@@ -48,6 +48,14 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
+void AdvanceProgramCounter()
+{
+    // Advance program counters.
+    machine->registers[PrevPCReg] = machine->registers[PCReg];
+    machine->registers[PCReg] = machine->registers[NextPCReg];
+    machine->registers[NextPCReg] = machine->registers[NextPCReg] + 4;
+}
+
 char *UserToSystem(int virtAddr, int limit)
 {
     int i; // index
@@ -98,7 +106,29 @@ void ExceptionHandler(ExceptionType which)
     switch (which)
     {
     case NoException:
+        printf("[Log]: Everything ok!\n");
         return;
+    case PageFaultException:
+        printf("[Error]: No valid translation found\n");
+        interrupt->Halt();
+    case ReadOnlyException:
+        printf("[Error]: Write attempted to page marked  'read - only'\n");
+        interrupt->Halt();
+    case BusErrorException:
+        printf("[Error]: Translation resulted in an invalid physical address\n");
+        interrupt->Halt();
+    case AddressErrorException:
+        printf("[Error]: Unaligned reference or one that was beyond the end of the address space\n");
+        interrupt->Halt();
+    case OverflowException:
+        printf("[Error]: Integer overflow in add or sub.\n");
+        interrupt->Halt();
+    case IllegalInstrException:
+        printf("[Error]: Unimplemented or reserved instr.\n");
+        interrupt->Halt();
+    case NumExceptionTypes:
+        printf("[Error]: Number exception types\n");
+        interrupt->Halt();
     case SyscallException:
         switch (type)
         {
@@ -152,10 +182,68 @@ void ExceptionHandler(ExceptionType which)
             delete filename;
             break;
         }
+        case SC_ReadInt:
+        {
+            char *buffer = new char[100];
+            int length = gSynchConsole->Read(buffer, 100);
+            int number = 0;
+
+            try
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    if (buffer[i] < '0' || buffer[i] > '9')
+                    {
+                        throw "Invalid input!\n";
+                    }
+                }
+
+                number = atoi(buffer);
+            }
+            catch (const char *msg)
+            {
+                printf("%s", msg);
+                machine->WriteRegister(2, -1);
+                delete buffer;
+                return;
+            }
+
+            printf("ReadInt: %d\n", number);
+
+            machine->WriteRegister(2, 0);
+            delete buffer;
+            break;
+        }
+        case SC_PrintInt:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            char* number = UserToSystem(virtAddr, 100);
+
+            // char *buffer = new char[100];
+
+            // int i = 0;
+            // while (number > 0)
+            // {
+            //     int digit = number % 10;
+            //     printf("%d\n", digit);
+            //     number /= 10;
+            //     buffer[i++] = char(digit + 48);
+            // }
+
+            printf("PrintInt: %s\n", number);
+            gSynchConsole->Write(number, 100);
+
+            machine->WriteRegister(2, 0);
+            delete number;
+            break;
+        }
         default:
-            printf("\n Unexpected user mode exception (%d %d)", which,
+            printf("Unexpected user mode exception (%d %d) \n", which,
                    type);
             interrupt->Halt();
+            break;
         }
+
+        AdvanceProgramCounter();
     }
 }
