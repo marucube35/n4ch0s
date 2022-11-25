@@ -77,10 +77,13 @@ AddrSpace::AddrSpace(OpenFile *executable)
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
-    ASSERT(numPages <= NumPhysPages); // check we're not trying
-                                      // to run anything too big --
-                                      // at least until we have
-                                      // virtual memory
+    if (numPages > gPhysPageBitMap->CountEmptyPages())
+    {
+        printf("\nAddrSpace:Load: not enough memory for new process..!");
+        numPages = 0;
+        delete executable;
+        return;
+    }
 
     DEBUG('a', "Initializing address space, num pages %d, size %d\n",
           numPages, size);
@@ -89,7 +92,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++)
     {
-        pageTable[i].virtualPage = i; // for now, virtual page # = phys page #
+        pageTable[i].virtualPage = i;                        // for now, virtual page # = phys page #
         pageTable[i].physicalPage = gPhysPageBitMap->Find(); // Tìm trang trống
         pageTable[i].valid = TRUE;
         pageTable[i].use = FALSE;
