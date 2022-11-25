@@ -203,42 +203,75 @@ void ExceptionHandler(ExceptionType which)
             catch (const char *msg)
             {
                 printf("%s", msg);
-                machine->WriteRegister(2, -1);
                 delete buffer;
                 return;
             }
 
-            printf("ReadInt: %d\n", number);
-
-            machine->WriteRegister(2, 0);
+            machine->WriteRegister(2, number); // trả về giá trị cho thanh ghi r2
             delete buffer;
             break;
         }
         case SC_PrintInt:
         {
-            int virtAddr = machine->ReadRegister(4);
-            char* number = UserToSystem(virtAddr, 100);
+            int number = machine->ReadRegister(4);
+            char *buffer = new char[100];
 
-            // char *buffer = new char[100];
+            int temp = number;
+            int numberOfDigits = 0;
+            while (temp > 0)
+            {
+                temp /= 10;
+                numberOfDigits++;
+            }
 
-            // int i = 0;
-            // while (number > 0)
-            // {
-            //     int digit = number % 10;
-            //     printf("%d\n", digit);
-            //     number /= 10;
-            //     buffer[i++] = char(digit + 48);
-            // }
+            for (int i = numberOfDigits - 1; i >= 0; i--)
+            {
+                buffer[i] = char(number % 10 + 48);
+                number /= 10;
+            }
 
-            printf("PrintInt: %s\n", number);
-            gSynchConsole->Write(number, 100);
-
-            machine->WriteRegister(2, 0);
-            delete number;
+            gSynchConsole->Write(buffer, numberOfDigits);
             break;
         }
+        case SC_ReadChar:
+        {
+            char *character = new char[255];
+            int length = gSynchConsole->Read(character, 255);
+
+            machine->WriteRegister(2, (int)character[0]); // trả về giá trị cho thanh ghi r2
+            break;
+        }
+        case SC_PrintChar:
+        {
+            char character = (char)machine->ReadRegister(4);
+
+            gSynchConsole->Write(&character, 1);
+            break;
+        }
+        case SC_ReadString:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            int bufferSize = machine->ReadRegister(5);
+            char *buffer = new char[bufferSize];
+
+            int length = gSynchConsole->Read(buffer, bufferSize);
+            SystemToUser(virtAddr, length, buffer);
+            delete buffer;
+            break;
+        }
+        case SC_PrintString:
+        {
+            int bufferSize = 255;
+            int virtAddr = machine->ReadRegister(4);
+
+            char *buffer = UserToSystem(virtAddr, bufferSize + 1);
+            gSynchConsole->Write(buffer, bufferSize);
+            delete buffer;
+            break;
+        }
+
         default:
-            printf("Unexpected user mode exception (%d %d) \n", which,
+            printf("\nUnexpected user mode exception (%d %d) \n", which,
                    type);
             interrupt->Halt();
             break;

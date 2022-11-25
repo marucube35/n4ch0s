@@ -3,6 +3,8 @@
 
 int main()
 {
-    int n = ReadInt();
-    PrintInt(n);
+    int bufferSize = 255;
+    char buffer[bufferSize];
+    ReadString(buffer, bufferSize);
+    PrintString(buffer);
 }
