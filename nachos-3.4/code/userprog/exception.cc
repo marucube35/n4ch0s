@@ -141,36 +141,39 @@ void ExceptionHandler(ExceptionType which)
         case SC_Exec:
         {
             int virtAddr;
-            char *programName;
+            char *filename;
 
             DEBUG('a', "SC_Exec call ...\n");
-            DEBUG('a', "Reading virtual address of program name\n");
+            DEBUG('a', "Reading virtual address of file name\n");
 
             // Lấy tham số tên chương trình từ thanh ghi r4
             virtAddr = machine->ReadRegister(4);
-            DEBUG('a', "Reading program name.\n");
+            DEBUG('a', "Reading file name.\n");
 
             // Lấy dữ liệu từ vùng nhớ của người dùng (đối số truyền vào)
-            // thông qua địa chỉ ảo và sao chép vào vùng nhớ của hệ điều hành (programName)
+            // thông qua địa chỉ ảo và sao chép vào vùng nhớ của hệ điều hành (filename)
             int MaxProgramLength = 32;
-            programName = UserToSystem(virtAddr, MaxProgramLength + 1);
+            filename = UserToSystem(virtAddr, MaxProgramLength + 1);
 
             // Trường hợp không đủ vùng nhớ để lưu tên chương trình
-            if (programName == NULL)
+            if (filename == NULL)
             {
                 DEBUG('a', "Not enough memory in system.\n");
                 printf("Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
-                delete programName;
+                delete filename;
                 return;
             }
 
             DEBUG('a', "Finish reading program name.\n");
-            printf("\nCreate file: %s\n", programName);
+            printf("\nCreate file: %s\n", filename);
 
-            machine->WriteRegister(2, 0); // trả về giá trị 0 cho thanh ghi r2 (thành công)
-            delete programName;
+            // Tạo tiến trình mới
+            int pid = pTab->ExecUpdate(filename);
+            machine->WriteRegister(2, pid); // trả về giá trị pid cho thanh ghi r2 (thành công)
+            
+            delete filename;
             break;
         }
         case SC_Create:
