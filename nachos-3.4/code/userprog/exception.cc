@@ -138,6 +138,10 @@ void ExceptionHandler(ExceptionType which)
 
             interrupt->Halt();
             break;
+        case SC_Exec:
+        {
+            
+        }
         case SC_Create:
         {
             int virtAddr;
