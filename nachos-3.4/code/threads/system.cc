@@ -32,8 +32,8 @@ Machine *machine;   // user program memory and registers
 SynchConsole *gSynchConsole;
 BitMap *gPhysPageBitMap;
 Lock *addrLock;
-// STable *semTab;
 // PTable *pTab;
+// STable *semTab;
 #endif
 
 #ifdef NETWORK
@@ -162,6 +162,9 @@ void Initialize(int argc, char **argv)
     gSynchConsole = new SynchConsole();
     gPhysPageBitMap = new BitMap(NumPhysPages); // biến NumPhysPage có trong machine.h
                                                 // và được include bên trong system.h
+    // pTab = new PTable(10);
+    // semTab = new STable();
+
 #endif
 
 #ifdef FILESYS
@@ -193,8 +196,8 @@ void Cleanup()
     delete gSynchConsole;
     delete gPhysPageBitMap;
     delete addrLock;
-    // delete semTab;
     // delete pTab;
+    // delete semTab;
 #endif
 
 #ifdef FILESYS_NEEDED
