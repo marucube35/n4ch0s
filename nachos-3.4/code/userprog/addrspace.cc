@@ -81,7 +81,7 @@ AddrSpace::AddrSpace(char *filename)
         SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
 
-    addrLock->Acquire();
+    addrLock->P();
 
     // How big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize; // we need to increase the size
@@ -96,7 +96,7 @@ AddrSpace::AddrSpace(char *filename)
         printf("\nAddrSpace:Load: not enough memory for new process..!");
         numPages = 0;
         delete executable;
-        addrLock->Release();
+        addrLock->V();
         return;
     }
 
@@ -118,7 +118,7 @@ AddrSpace::AddrSpace(char *filename)
         printf("phyPage %d \n", pageTable[i].physicalPage);
     }
 
-    addrLock->Release();
+    addrLock->V();
 
     // Calculate numCodePage and numDataPage
     numCodePage = divRoundUp(noffH.code.size, PageSize);

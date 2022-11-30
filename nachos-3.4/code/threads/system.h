@@ -16,6 +16,10 @@
 #include "timer.h"
 #include "utility.h"
 
+#include "bitmap.h"
+#include "ptable.h"
+#include "stable.h"
+
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); // Initialization,
 											   // called before anything else
@@ -36,17 +40,12 @@ extern Machine *machine; // user program memory and registers
 #include "synchcons.h"
 extern SynchConsole *gSynchConsole;
 
-#include "bitmap.h"
-extern BitMap *gPhysPageBitMap;
-
 #include "synch.h"
-extern Lock *addrLock;
+extern Semaphore *addrLock;
 
-#include "stable.h"
-// extern STable *semTab;
-
-#include "ptable.h"
-// extern PTable *pTab;
+extern BitMap *gPhysPageBitMap;
+extern PTable *pTab;
+extern STable *semTab;
 
 #endif
 

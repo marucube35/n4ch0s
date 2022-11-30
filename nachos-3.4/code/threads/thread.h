@@ -86,6 +86,9 @@ private:
   int machineState[MachineStateSize]; // all registers except for stackTop
 
 public:
+  int processID;
+  int exitStatus;
+
   Thread(char *debugName); // initialize a Thread
   ~Thread();               // deallocate a Thread
                            // NOTE -- thread being deleted
@@ -96,10 +99,10 @@ public:
 
   void Fork(VoidFunctionPtr func, int arg); // Make thread run (*func)(arg)
   void Yield();                             // Relinquish the CPU if any
-                // other thread is runnable
-  void Sleep(); // Put the thread to sleep and
-                // relinquish the processor
-  void Finish(); // The thread is done executing
+                                            // other thread is runnable
+  void Sleep();                             // Put the thread to sleep and
+                                            // relinquish the processor
+  void Finish();                            // The thread is done executing
 
   void CheckOverflow(); // Check if thread has
                         // overflowed its stack

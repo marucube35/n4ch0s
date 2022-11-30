@@ -14,6 +14,10 @@
 #include "addrspace.h"
 #include "synch.h"
 
+void StartProcess_2(int id)
+{
+}
+
 //----------------------------------------------------------------------
 // StartProcess
 // 	Run a user program.  Open the executable, load it into

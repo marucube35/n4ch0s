@@ -30,8 +30,9 @@ SynchDisk *synchDisk;
 #ifdef USER_PROGRAM // requires either FILESYS or FILESYS_STUB
 Machine *machine;   // user program memory and registers
 SynchConsole *gSynchConsole;
+
 BitMap *gPhysPageBitMap;
-Lock *addrLock;
+Semaphore *addrLock;
 // PTable *pTab;
 // STable *semTab;
 #endif
@@ -162,6 +163,7 @@ void Initialize(int argc, char **argv)
     gSynchConsole = new SynchConsole();
     gPhysPageBitMap = new BitMap(NumPhysPages); // biến NumPhysPage có trong machine.h
                                                 // và được include bên trong system.h
+    addrLock = new Semaphore("addrLock", 1);
     // pTab = new PTable(10);
     // semTab = new STable();
 

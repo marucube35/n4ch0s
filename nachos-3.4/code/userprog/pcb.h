@@ -8,11 +8,12 @@ class PCB
 private:
     Semaphore *joinsem; // semaphore cho quá trình join
     Semaphore *exitsem; // semaphore cho quá trình exit
-    Semaphore *mutex;   // semaphore cho quá trình truy xuất độc quyền
+    Semaphore *multex;  // semaphore cho quá trình truy xuất độc quyền
     Thread *thread;
     int pid;
-    int exitcode;
-    int numwait; // số tiến trình đã join
+    int exitcode = 0;
+    int numwait = 0; // số tiến trình đã join
+    char *filename;
 
 public:
     int parentID; // ID của tiến trình cha
@@ -32,15 +33,15 @@ public:
     void JoinRelease(); // 3. Cho phép tiến trình con kết thúc
     void ExitRelease(); // 4. Tiến trình con kết thúc
 
-    // Tăng giảm số tiến trình đã Join – với việc sử dụng biến mutex
+    // Tăng giảm số tiến trình đã Join – với việc sử dụng biến multex
     void IncNumWait(); // Tăng số tiến trình chờ
     void DecNumWait(); // Giảm số tiến trình chờ
 
     void SetExitCode(int ec) { exitcode = ec; } // Đặt exitcode của tiến trình
     int GetExitCode() { return exitcode; }      // Trả về exitcode
 
-    void SetFileName(char *fn); // Đặt tên của tiến trình
-    char *GetFileName();        // Trả về tên của tiến trình
+    void SetFileName(char *fn) { this->filename = fn; } // Đặt tên của tiến trình
+    char *GetFileName() { return this->filename; }      // Trả về tên của tiến trình
 };
 
 #endif
