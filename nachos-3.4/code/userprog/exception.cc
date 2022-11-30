@@ -140,12 +140,43 @@ void ExceptionHandler(ExceptionType which)
             break;
         case SC_Exec:
         {
-            
+            int virtAddr;
+            char *programName;
+
+            DEBUG('a', "SC_Exec call ...\n");
+            DEBUG('a', "Reading virtual address of program name\n");
+
+            // Lấy tham số tên chương trình từ thanh ghi r4
+            virtAddr = machine->ReadRegister(4);
+            DEBUG('a', "Reading program name.\n");
+
+            // Lấy dữ liệu từ vùng nhớ của người dùng (đối số truyền vào)
+            // thông qua địa chỉ ảo và sao chép vào vùng nhớ của hệ điều hành (programName)
+            int MaxProgramLength = 32;
+            programName = UserToSystem(virtAddr, MaxProgramLength + 1);
+
+            // Trường hợp không đủ vùng nhớ để lưu tên chương trình
+            if (programName == NULL)
+            {
+                DEBUG('a', "Not enough memory in system.\n");
+                printf("Not enough memory in system.\n");
+
+                machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
+                delete programName;
+                return;
+            }
+
+            DEBUG('a', "Finish reading program name.\n");
+            printf("\nCreate file: %s\n", programName);
+
+            machine->WriteRegister(2, 0); // trả về giá trị 0 cho thanh ghi r2 (thành công)
+            delete programName;
+            break;
         }
         case SC_Create:
         {
             int virtAddr;
-            char *filename;
+            char *fileName;
 
             DEBUG('a', "SC_Create call ...\n");
             DEBUG('a', "Reading virtual address of filename\n");
@@ -156,34 +187,34 @@ void ExceptionHandler(ExceptionType which)
 
             // Lấy dữ liệu từ vùng nhớ thông qua địa chỉ ảo
             int MaxFileLength = 32;
-            filename = UserToSystem(virtAddr, MaxFileLength + 1);
+            fileName = UserToSystem(virtAddr, MaxFileLength + 1);
 
             // Trường hợp không đủ vùng nhớ để lưu tên file
-            if (filename == NULL)
+            if (fileName == NULL)
             {
                 DEBUG('a', "Not enough memory in system.\n");
                 printf("Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
-                delete filename;
+                delete fileName;
                 return;
             }
 
             DEBUG('a', "Finish reading filename.\n");
-            printf("\nCreate file: %s\n", filename);
+            printf("\nCreate file: %s\n", fileName);
 
             // Trường hợp không thể tạo file
-            if (!fileSystem->Create(filename, 0))
+            if (!fileSystem->Create(fileName, 0))
             {
-                printf("Error create file '%s'\n", filename);
+                printf("Error create file '%s'\n", fileName);
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
-                delete filename;
+                delete fileName;
                 return;
             }
 
             machine->WriteRegister(2, 0); // trả về giá trị 0 cho thanh ghi r2 (thành công)
-            delete filename;
+            delete fileName;
             break;
         }
         case SC_ReadInt:

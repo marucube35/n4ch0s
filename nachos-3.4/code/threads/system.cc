@@ -31,6 +31,9 @@ SynchDisk *synchDisk;
 Machine *machine;   // user program memory and registers
 SynchConsole *gSynchConsole;
 BitMap *gPhysPageBitMap;
+Lock *addrLock;
+// STable *semTab;
+// PTable *pTab;
 #endif
 
 #ifdef NETWORK
@@ -189,6 +192,9 @@ void Cleanup()
     delete machine;
     delete gSynchConsole;
     delete gPhysPageBitMap;
+    delete addrLock;
+    // delete semTab;
+    // delete pTab;
 #endif
 
 #ifdef FILESYS_NEEDED

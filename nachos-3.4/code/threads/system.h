@@ -37,7 +37,17 @@ extern Machine *machine; // user program memory and registers
 extern SynchConsole *gSynchConsole;
 
 #include "bitmap.h"
-extern BitMap* gPhysPageBitMap;
+extern BitMap *gPhysPageBitMap;
+
+#include "synch.h"
+extern Lock *addrLock;
+
+#include "stable.h"
+// extern STable *semTab;
+
+#include "ptable.h"
+// extern PTable *pTab;
+
 #endif
 
 #ifdef FILESYS_NEEDED // FILESYS or FILESYS_STUB
