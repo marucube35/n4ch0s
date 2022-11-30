@@ -53,7 +53,11 @@ public:
 	void FetchFrom(OpenFile *file); // fetch contents from disk
 	void WriteBack(OpenFile *file); // write contents to disk
 
+<<<<<<< HEAD
 	// Tìm số trang trống
+=======
+	// Tìm số bit trống
+>>>>>>> 651f692a0f4c3302b500bd10ae4f891743ccbbae
 	int CountEmptyPages();
 
 private:

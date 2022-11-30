@@ -19,6 +19,11 @@ Statistics *stats;           // performance metrics
 Timer *timer;                // the hardware timer device,
                              // for invoking context switches
 
+SynchConsole *gSynchConsole; // synch console
+BitMap *gPhysPageBitMap;     // physical page bitmap
+Semaphore *addrLock;         // lock for allocating physical pages
+PTable *pTab;                // process table
+STable *semTab;              // semaphore table
 #ifdef FILESYS_NEEDED
 FileSystem *fileSystem;
 #endif
@@ -29,8 +34,7 @@ SynchDisk *synchDisk;
 
 #ifdef USER_PROGRAM // requires either FILESYS or FILESYS_STUB
 Machine *machine;   // user program memory and registers
-SynchConsole *gSynchConsole;
-BitMap *gPhysPageBitMap;
+
 #endif
 
 #ifdef NETWORK
@@ -159,6 +163,10 @@ void Initialize(int argc, char **argv)
     gSynchConsole = new SynchConsole();
     gPhysPageBitMap = new BitMap(NumPhysPages); // biến NumPhysPage có trong machine.h
                                                 // và được include bên trong system.h
+    addrLock = new Semaphore("addrLock", 1);
+    pTab = new PTable(10);
+    semTab = new STable();
+
 #endif
 
 #ifdef FILESYS
@@ -189,6 +197,9 @@ void Cleanup()
     delete machine;
     delete gSynchConsole;
     delete gPhysPageBitMap;
+    delete addrLock;
+    delete pTab;
+    delete semTab;
 #endif
 
 #ifdef FILESYS_NEEDED
