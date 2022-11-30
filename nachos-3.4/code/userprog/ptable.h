@@ -3,7 +3,6 @@
 #define MAX_PROCESS 10
 #include "bitmap.h"
 #include "pcb.h"
-#include "schandle.h"
 #include "synch.h"
 
 class PTable
