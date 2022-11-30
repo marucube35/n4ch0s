@@ -12,11 +12,6 @@
 #include "system.h"
 #include "console.h"
 #include "addrspace.h"
-#include "synch.h"
-
-void StartProcess_2(int id)
-{
-}
 
 //----------------------------------------------------------------------
 // StartProcess

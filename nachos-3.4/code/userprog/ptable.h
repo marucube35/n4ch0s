@@ -5,26 +5,27 @@
 #include "pcb.h"
 #include "synch.h"
 
+// Lớp quản lý các tiến trình đang chạy,
+// bản chất là một bảng (mảng) các tiến trình.
 class PTable
 {
 private:
-    BitMap *bm;
-    PCB *pcb[MAX_PROCESS];
-    int psize;
-    Semaphore *bmsem; // dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng lúc
+    int psize;             // kích thước của bảng các tiến trình
+    PCB *pcb[MAX_PROCESS]; // lưu các pcb của các tiến trình
+    BitMap *bm;            // lưu trạng thái của các tiến trình trong bảng các tiến trình (trống hoặc không trống)
+    Semaphore *bmsem;      // dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng lúc
 
 public:
-    PTable(int size); // Khởi tạo size đối tượng pcb để lưu size process.
-                      // Gán giá trị ban đầu là null.
-                      // Nhớ khởi tạo *bm và *bmsem để sử dụng
-    ~PTable();        // Hủy các đối tượng đã tạo
+    // Khởi tạo 'size' đối tượng pcb để lưu 'size' process.
+    PTable(int size);
+    ~PTable();
 
     int ExecUpdate(char *name); // Xử lý cho system call SC_Exec
     int ExitUpdate(int ec);     // Xử lý cho system call SC_Exit
     int JoinUpdate(int id);     // Xử lý cho system call SC_Join
 
-    int GetFreeSlot();         // Tìm free slot để lưu thông tin cho tiến trình mới
-    bool IsExist(int pid);     // Kiểm tra tồn tại processID này không?
+    int GetFreeSlot();         // Tìm chỗ trống trong bảng để lưu thông tin cho tiến trình mới
+    bool IsExist(int pid);     // Kiểm tra có tồn tại processID này không?
     void Remove(int pid);      // Khi tiến trình kết thúc, delete processID ra khỏi mảng quản lý nó
     char *GetFileName(int id); // Trả về tên của tiến trình
 };

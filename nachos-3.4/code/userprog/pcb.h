@@ -11,9 +11,9 @@ private:
     Semaphore *multex;  // semaphore cho quá trình truy xuất độc quyền
     Thread *thread;
     int pid;
-    int exitcode = 0;
-    int numwait = 0; // số tiến trình đã join
-    char *filename;
+    int exitcode;
+    int numwait;    // số tiến trình đã join
+    char *filename; // tên tiến trình
 
 public:
     int parentID; // ID của tiến trình cha
