@@ -76,15 +76,11 @@ USERPROG_H = ../userprog/addrspace.h\
 	../machine/machine.h\
 	../machine/mipssim.h\
 	../machine/translate.h\
-<<<<<<< HEAD
-	../threads/synchcons.h
-=======
 	../threads/synchcons.h\
 	../userprog/pcb.h\
 	../userprog/ptable.h\
 	../userprog/stable.h\
 	../userprog/sem.h
->>>>>>> 651f692a0f4c3302b500bd10ae4f891743ccbbae
 
 USERPROG_C = ../userprog/addrspace.cc\
 	../userprog/bitmap.cc\
@@ -94,12 +90,6 @@ USERPROG_C = ../userprog/addrspace.cc\
 	../machine/machine.cc\
 	../machine/mipssim.cc\
 	../machine/translate.cc\
-<<<<<<< HEAD
-	../threads/synchcons.cc
-
-USERPROG_O = addrspace.o bitmap.o exception.o progtest.o console.o machine.o \
-	mipssim.o translate.o synchcons.o
-=======
 	../threads/synchcons.cc\
 	../userprog/pcb.cc\
 	../userprog/ptable.cc\
@@ -108,7 +98,6 @@ USERPROG_O = addrspace.o bitmap.o exception.o progtest.o console.o machine.o \
 
 USERPROG_O = addrspace.o bitmap.o exception.o progtest.o console.o machine.o \
 	mipssim.o translate.o synchcons.o pcb.o ptable.o stable.o sem.o 
->>>>>>> 651f692a0f4c3302b500bd10ae4f891743ccbbae
 
 VM_H = 
 VM_C = 
