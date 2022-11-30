@@ -138,23 +138,24 @@ void ExceptionHandler(ExceptionType which)
 
             interrupt->Halt();
             break;
-        case SC_Create:
+        case SC_Exec:
         {
             int virtAddr;
             char *filename;
 
-            DEBUG('a', "SC_Create call ...\n");
-            DEBUG('a', "Reading virtual address of filename\n");
+            DEBUG('a', "SC_Exec call ...\n");
+            DEBUG('a', "Reading virtual address of file name\n");
 
-            // Lấy tham số tên tập tin từ thanh ghi r4
+            // Lấy tham số tên chương trình từ thanh ghi r4
             virtAddr = machine->ReadRegister(4);
-            DEBUG('a', "Reading filename.\n");
+            DEBUG('a', "Reading file name.\n");
 
-            // Lấy dữ liệu từ vùng nhớ thông qua địa chỉ ảo
-            int MaxFileLength = 32;
-            filename = UserToSystem(virtAddr, MaxFileLength + 1);
+            // Lấy dữ liệu từ vùng nhớ của người dùng (đối số truyền vào)
+            // thông qua địa chỉ ảo và sao chép vào vùng nhớ của hệ điều hành (filename)
+            int MaxProgramLength = 32;
+            filename = UserToSystem(virtAddr, MaxProgramLength + 1);
 
-            // Trường hợp không đủ vùng nhớ để lưu tên file
+            // Trường hợp không đủ vùng nhớ để lưu tên chương trình
             if (filename == NULL)
             {
                 DEBUG('a', "Not enough memory in system.\n");
@@ -165,21 +166,74 @@ void ExceptionHandler(ExceptionType which)
                 return;
             }
 
-            DEBUG('a', "Finish reading filename.\n");
+            DEBUG('a', "Finish reading program name.\n");
             printf("\nCreate file: %s\n", filename);
 
-            // Trường hợp không thể tạo file
-            if (!fileSystem->Create(filename, 0))
+            // Tạo tiến trình mới
+            int pid = pTab->ExecUpdate(filename);
+            machine->WriteRegister(2, pid); // trả về giá trị pid cho thanh ghi r2 (thành công)
+
+            delete filename;
+            break;
+        }
+        case SC_Join:
+        {
+            int pid = machine->ReadRegister(4);
+            int exitcode = pTab->JoinUpdate(pid);
+
+            machine->WriteRegister(2, exitcode);
+            break;
+        }
+        case SC_Exit:
+        {
+            int exitStatus = machine->ReadRegister(4);
+            int exitcode = pTab->ExitUpdate(exitStatus);
+
+            machine->WriteRegister(2, exitcode);
+            break;
+        }
+        case SC_Create:
+        {
+            int virtAddr;
+            char *fileName;
+
+            DEBUG('a', "SC_Create call ...\n");
+            DEBUG('a', "Reading virtual address of filename\n");
+
+            // Lấy tham số tên tập tin từ thanh ghi r4
+            virtAddr = machine->ReadRegister(4);
+            DEBUG('a', "Reading filename.\n");
+
+            // Lấy dữ liệu từ vùng nhớ thông qua địa chỉ ảo
+            int MaxFileLength = 32;
+            fileName = UserToSystem(virtAddr, MaxFileLength + 1);
+
+            // Trường hợp không đủ vùng nhớ để lưu tên file
+            if (fileName == NULL)
             {
-                printf("Error create file '%s'\n", filename);
+                DEBUG('a', "Not enough memory in system.\n");
+                printf("Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
-                delete filename;
+                delete fileName;
+                return;
+            }
+
+            DEBUG('a', "Finish reading filename.\n");
+            printf("\nCreate file: %s\n", fileName);
+
+            // Trường hợp không thể tạo file
+            if (!fileSystem->Create(fileName, 0))
+            {
+                printf("Error create file '%s'\n", fileName);
+
+                machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
+                delete fileName;
                 return;
             }
 
             machine->WriteRegister(2, 0); // trả về giá trị 0 cho thanh ghi r2 (thành công)
-            delete filename;
+            delete fileName;
             break;
         }
         case SC_ReadInt:

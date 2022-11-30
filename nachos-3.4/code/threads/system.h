@@ -16,6 +16,12 @@
 #include "timer.h"
 #include "utility.h"
 
+#include "bitmap.h"
+#include "ptable.h"
+#include "stable.h"
+#include "synch.h"
+#include "synchcons.h"
+
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); // Initialization,
 											   // called before anything else
@@ -29,15 +35,15 @@ extern Interrupt *interrupt;		// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 
+extern SynchConsole *gSynchConsole; // synch console
+extern BitMap *gPhysPageBitMap;		// physical page bitmap
+extern Semaphore *addrLock;			// lock for allocating physical pages
+extern PTable *pTab;				// process table
+extern STable *semTab;				// semaphore table
+
 #ifdef USER_PROGRAM
 #include "machine.h"
 extern Machine *machine; // user program memory and registers
-
-#include "synchcons.h"
-extern SynchConsole *gSynchConsole;
-
-#include "bitmap.h"
-extern BitMap* gPhysPageBitMap;
 #endif
 
 #ifdef FILESYS_NEEDED // FILESYS or FILESYS_STUB

@@ -12,7 +12,6 @@
 #include "system.h"
 #include "console.h"
 #include "addrspace.h"
-#include "synch.h"
 
 //----------------------------------------------------------------------
 // StartProcess
@@ -30,7 +29,7 @@ void StartProcess(char *filename)
         printf("Unable to open file %s\n", filename);
         return;
     }
-    space = new AddrSpace(executable);
+    space = new AddrSpace(filename);
     currentThread->space = space;
 
     delete executable; // close file
