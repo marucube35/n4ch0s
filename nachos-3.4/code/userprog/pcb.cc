@@ -85,3 +85,30 @@ int PCB::Exec(char *filename, int pid)
 
     return this->pid;
 }
+
+// Tiến trình cha đợi tiến trình con kết thúc
+void PCB::JoinWait()
+{
+
+    joinsem->P(); // tiến trình chuyển sang trạng thái block và ngừng lại,
+                  // chờ JoinRelease để thực hiện tiếp
+}
+
+// Tiến trình con kết thúc
+void PCB::ExitRelease()
+{
+    exitsem->V(); // để giải phóng tiến trình đang chờ
+}
+
+// Cho phép tiến trình con kết thúc
+void PCB::JoinRelease()
+{
+    joinsem->V(); // để giải phóng tiến trình gọi JoinWait()
+}
+
+// Báo cho tiến trình cha thực thi tiếp
+void PCB::ExitWait()
+{
+    exitsem->V(); // để tiến trình chuyển sang trạng thái block và ngừng lại,
+                  // chờ ExitRelease để thực hiện tiếp
+}

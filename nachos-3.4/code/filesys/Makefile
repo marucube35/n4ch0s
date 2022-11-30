@@ -570,8 +570,8 @@ pcb.o: ../userprog/pcb.cc /usr/include/stdc-predef.h ../userprog/pcb.h \
  ../threads/synchcons.h ../machine/console.h ../filesys/synchdisk.h \
  ../machine/disk.h
 ptable.o: ../userprog/ptable.cc /usr/include/stdc-predef.h \
- ../userprog/ptable.h ../userprog/bitmap.h ../threads/copyright.h \
- ../filesys/openfile.h ../threads/utility.h ../threads/copyright.h \
+ ../threads/system.h ../threads/copyright.h ../machine/interrupt.h \
+ ../threads/copyright.h ../threads/list.h ../threads/utility.h \
  ../threads/bool.h ../machine/sysdep.h /usr/include/stdio.h \
  /usr/include/features.h /usr/include/i386-linux-gnu/sys/cdefs.h \
  /usr/include/i386-linux-gnu/bits/wordsize.h \
@@ -583,16 +583,16 @@ ptable.o: ../userprog/ptable.cc /usr/include/stdc-predef.h \
  /usr/include/_G_config.h /usr/include/wchar.h ../threads/stdarg.h \
  /usr/include/i386-linux-gnu/bits/stdio_lim.h \
  /usr/include/i386-linux-gnu/bits/sys_errlist.h /usr/include/string.h \
- /usr/include/xlocale.h ../userprog/pcb.h ../threads/synch.h \
- ../threads/thread.h ../threads/utility.h ../machine/machine.h \
+ /usr/include/xlocale.h ../threads/scheduler.h ../threads/list.h \
+ ../threads/thread.h ../machine/machine.h ../threads/utility.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
- ../filesys/filesys.h ../filesys/openfile.h ../threads/list.h \
- ../threads/thread.h ../threads/system.h ../machine/interrupt.h \
- ../threads/list.h ../threads/scheduler.h ../machine/stats.h \
- ../machine/timer.h ../userprog/bitmap.h ../userprog/ptable.h \
- ../userprog/stable.h ../userprog/sem.h ../threads/synch.h \
- ../threads/synchcons.h ../machine/console.h ../filesys/synchdisk.h \
- ../machine/disk.h
+ ../filesys/filesys.h ../filesys/openfile.h ../machine/stats.h \
+ ../machine/timer.h ../userprog/bitmap.h ../filesys/openfile.h \
+ ../userprog/ptable.h ../userprog/bitmap.h ../userprog/pcb.h \
+ ../threads/synch.h ../threads/thread.h ../userprog/stable.h \
+ ../userprog/sem.h ../threads/synch.h ../threads/synchcons.h \
+ ../machine/console.h ../filesys/synchdisk.h ../machine/disk.h \
+ ../userprog/ptable.h
 stable.o: ../userprog/stable.cc /usr/include/stdc-predef.h \
  ../userprog/stable.h ../userprog/bitmap.h ../threads/copyright.h \
  ../filesys/openfile.h ../threads/utility.h ../threads/copyright.h \

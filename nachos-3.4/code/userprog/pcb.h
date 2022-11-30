@@ -12,7 +12,7 @@ private:
     Thread *thread;
     int pid;
     int exitcode;
-    int numwait;    // số tiến trình đã join
+    int numwait;    // số thread đã join
     char *filename; // tên tiến trình
 
 public:
@@ -23,7 +23,7 @@ public:
     // Nạp chương trình có tên lưu trong biến filename và processID là pid
     int Exec(char *filename, int pid);   // Tạo 1 thread mới có tên là filename và process là pid
     int GetID() { return pid; }          // Trả về ProcessID của tiến trình gọi thực hiện
-    int GetNumWait() { return numwait; } // Trả về số lượng tiến trình chờ
+    int GetNumWait() { return numwait; } // Trả về số lượng thread chờ
 
     // Hai hàm này để quản lý tiến trình Join
     void JoinWait(); // 1. Tiến trình cha đợi tiến trình con kết thúc
@@ -34,8 +34,8 @@ public:
     void ExitRelease(); // 4. Tiến trình con kết thúc
 
     // Tăng giảm số tiến trình đã Join – với việc sử dụng biến multex
-    void IncNumWait(); // Tăng số tiến trình chờ
-    void DecNumWait(); // Giảm số tiến trình chờ
+    void IncNumWait() { this->numwait += 1; } // Tăng số tiến trình chờ
+    void DecNumWait() { this->numwait -= 1; } // Giảm số tiến trình chờ
 
     void SetExitCode(int ec) { exitcode = ec; } // Đặt exitcode của tiến trình
     int GetExitCode() { return exitcode; }      // Trả về exitcode

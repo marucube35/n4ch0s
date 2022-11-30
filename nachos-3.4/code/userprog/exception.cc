@@ -172,8 +172,24 @@ void ExceptionHandler(ExceptionType which)
             // Tạo tiến trình mới
             int pid = pTab->ExecUpdate(filename);
             machine->WriteRegister(2, pid); // trả về giá trị pid cho thanh ghi r2 (thành công)
-            
+
             delete filename;
+            break;
+        }
+        case SC_Join:
+        {
+            int pid = machine->ReadRegister(4);
+            int exitcode = pTab->JoinUpdate(pid);
+
+            machine->WriteRegister(2, exitcode);
+            break;
+        }
+        case SC_Exit:
+        {
+            int exitStatus = machine->ReadRegister(4);
+            int exitcode = pTab->ExitUpdate(exitStatus);
+
+            machine->WriteRegister(2, exitcode);
             break;
         }
         case SC_Create:
