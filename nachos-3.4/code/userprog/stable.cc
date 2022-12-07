@@ -8,6 +8,11 @@ STable::STable()
 STable::~STable()
 {
     delete bm;
+    for (int i = 0; i < MAX_SEMAPHORE; i++)
+    {
+        if (semTab[i] != NULL)
+            delete semTab[i];
+    }
 }
 
 int STable::IsExist(char *name)

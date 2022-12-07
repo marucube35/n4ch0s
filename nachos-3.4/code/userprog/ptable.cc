@@ -18,8 +18,6 @@ PTable::PTable(int size)
 
 PTable::~PTable()
 {
-    for (int i = 0; i < MAX_PROCESS; i++)
-        delete[] pcb[i];
     delete[] pcb;
     delete bm;
     delete bmsem;
