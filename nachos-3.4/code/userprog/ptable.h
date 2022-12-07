@@ -1,8 +1,8 @@
 #ifndef PTABLE_H
 #define PTABLE_H
 #include "bitmap.h"
-#include "synch.h"
 #include "pcb.h"
+#include "synch.h"
 #define MAX_PROCESS 10
 
 class PTable
@@ -10,7 +10,7 @@ class PTable
 private:
     int psize;
     PCB *pcb[MAX_PROCESS];
-    BitMap bm;        //? Đánh dấu các vị trí đã được sử dụng trong pcb
+    BitMap *bm;       //? Đánh dấu các vị trí đã được sử dụng trong pcb
     Semaphore *bmsem; // Dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng lúc
                       // Nhớ khởi tạo bm và bmsem để sử dụng
 
@@ -23,10 +23,10 @@ public:
     int ExitUpdate(int ec);     // Xử lý cho system call SC_Exit
     int JoinUpdate(int id);     // Xử lý cho system call SC_Join
 
-    int GetFreeSlot();         // Tìm free slot để lưu thông tin cho tiến trình mới
-    bool IsExist(int pid);     // Kiểm tra xem có tồn tại processID này không
-    void Remove(int pid);      // Khi tiến trình kết thúc, delete processID ra khỏi mảng quản lý nó
+    int GetFreeSlot();          // Tìm free slot để lưu thông tin cho tiến trình mới
+    bool IsExist(int pid);      // Kiểm tra xem có tồn tại processID này không
+    void Remove(int pid);       // Khi tiến trình kết thúc, delete processID ra khỏi mảng quản lý nó
     char *GetFileName(int pid); // Trả về tên của tiến trình
-}
+};
 
 #endif

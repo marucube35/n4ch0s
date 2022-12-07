@@ -25,3 +25,8 @@ PCB::~PCB()
     delete exitsem;
     delete multex;
 }
+
+int PCB::GetID()
+{
+    return pid;
+}

@@ -14,7 +14,7 @@ int STable::IsExist(char *name)
 {
     for (int i = 0; i < MAX_SEMAPHORE; i++)
     {
-        if (semTab[i] != NULL && strcmp(semTab[i]->getName(), name) == 0)
+        if (semTab[i] != NULL && strcmp(semTab[i]->GetName(), name) == 0)
             return i;
     }
 
@@ -32,7 +32,7 @@ int STable::Create(char *name, int init)
     if (index == -1)
         return -1;
 
-    semTab[index] = new Semaphore(name, init);
+    semTab[index] = new Sem(name, init);
 
     return index;
 }

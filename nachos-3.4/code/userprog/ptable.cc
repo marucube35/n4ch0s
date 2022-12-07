@@ -37,7 +37,7 @@ bool PTable::IsExist(int pid)
 {
     for (int i = 0; i < psize; i++)
     {
-        if (pcb[i] != NULL && pcb[i].GetID() == pid)
+        if (pcb[i] != NULL && pcb[i]->GetID() == pid)
             return true;
     }
 
@@ -49,7 +49,7 @@ void PTable::Remove(int pid)
     for (int i = 0; i < psize; i++)
     {
         //* Tìm kiếm pid trong mảng pcb và tiến hành xóa nếu tìm thấy
-        if (pcb[i] != NULL && pcb[i].GetID() == pid)
+        if (pcb[i] != NULL && pcb[i]->GetID() == pid)
         {
             bmsem->P();
 
@@ -71,8 +71,8 @@ char* PTable::GetFileName(int id)
     for (int i = 0; i < psize; i++)
     {
         //* Tìm kiếm pid trong mảng pcb và trả về tên nếu tìm thấy
-        if (pcb[i] != NULL && pcb[i].GetID() == id)
-            return pcb[i].GetFileName();
+        if (pcb[i] != NULL && pcb[i]->GetID() == id)
+            return pcb[i]->GetFileName();
     }
 
     return NULL;
