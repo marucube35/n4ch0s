@@ -2,7 +2,7 @@
 # All rights reserved.  See copyright.h for copyright notice and limitation 
 # of liability and disclaimer of warranty provisions.
 
-MAKE = make
+MAKE = gmake
 LPR = lpr
 
 all: 

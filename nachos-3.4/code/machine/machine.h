@@ -32,7 +32,7 @@
 					// the disk sector size, for
 					// simplicity
 
-#define NumPhysPages    128
+#define NumPhysPages    32
 #define MemorySize 	(NumPhysPages * PageSize)
 #define TLBSize		4		// if there is a TLB, make it small
 
@@ -62,9 +62,9 @@ enum ExceptionType { NoException,           // Everything ok!
 #define NumGPRegs	32	// 32 general purpose registers on MIPS
 #define HiReg		32	// Double register to hold multiply result
 #define LoReg		33
-#define PCReg		34	// Current 
-#define NextPCReg	35	// Next  (for branch delay) 
-#define PrevPCReg	36	// Previous  (for debugging)
+#define PCReg		34	// Current program counter
+#define NextPCReg	35	// Next program counter (for branch delay) 
+#define PrevPCReg	36	// Previous program counter (for debugging)
 #define LoadReg		37	// The register target of a delayed load.
 #define LoadValueReg 	38	// The value to be loaded by a delayed load.
 #define BadVAddrReg	39	// The failing virtual address on an exception
