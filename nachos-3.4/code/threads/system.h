@@ -16,7 +16,6 @@
 #include "timer.h"
 #include "utility.h"
 
-
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); // Initialization,
 											   // called before anything else
@@ -39,10 +38,16 @@ extern SynchConsole *gSynchConsole; // synch console
 
 // * Sử dụng biến toàn cục gPhysPageBitMap để quản lý các frames trong bộ nhớ
 #include "bitmap.h"
-extern BitMap *gPhysPageBitMap;		// bitmap
+extern BitMap *gPhysPageBitMap; // bitmap
 
 #include "synch.h"
-extern Semaphore *addrLock;	// lock
+extern Semaphore *addrLock; // lock
+
+#include "stable.h"
+extern STable *semTab;
+
+#include "ptable.h"
+extern PTable *pTab;
 #endif
 
 #ifdef FILESYS_NEEDED // FILESYS or FILESYS_STUB

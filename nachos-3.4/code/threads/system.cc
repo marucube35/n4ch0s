@@ -32,6 +32,8 @@ Machine *machine;            // user program memory and registers
 SynchConsole *gSynchConsole; // synch console
 BitMap *gPhysPageBitMap;     // bitmap
 Semaphore *addrLock;         // address lock
+PTable *pTab;                // process table
+STable *semTab;              // semaphore table
 #endif
 
 #ifdef NETWORK
@@ -160,6 +162,8 @@ void Initialize(int argc, char **argv)
     gSynchConsole = new SynchConsole();
     gPhysPageBitMap = new BitMap(NumPhysPages);
     addrLock = new Semaphore("addrLock", 1);
+    semTab = new STable();
+    pTab = new PTable(10);
 #endif
 
 #ifdef FILESYS
@@ -193,6 +197,8 @@ void Cleanup()
     delete gSynchConsole;
     delete gPhysPageBitMap;
     delete addrLock;
+    delete semTab;
+    delete pTab;
 #endif
 
 #ifdef FILESYS_NEEDED
