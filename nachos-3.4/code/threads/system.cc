@@ -19,8 +19,6 @@ Statistics *stats;           // performance metrics
 Timer *timer;                // the hardware timer device,
                              // for invoking context switches
 
-SynchConsole *gSynchConsole; // synch console
-
 #ifdef FILESYS_NEEDED
 FileSystem *fileSystem;
 #endif
@@ -31,7 +29,8 @@ SynchDisk *synchDisk;
 
 #ifdef USER_PROGRAM // requires either FILESYS or FILESYS_STUB
 Machine *machine;   // user program memory and registers
-
+SynchConsole *gSynchConsole; // synch console
+BitMap *gPhysPageBitMap;		// bitmap
 #endif
 
 #ifdef NETWORK
@@ -158,6 +157,7 @@ void Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine(debugUserProg); // this must come first
     gSynchConsole = new SynchConsole();
+    gPhysPageBitMap = new BitMap(NumPhysPages);
 #endif
 
 #ifdef FILESYS
@@ -187,6 +187,7 @@ void Cleanup()
 #ifdef USER_PROGRAM
     delete machine;
     delete gSynchConsole;
+    delete gPhysPageBitMap;
 #endif
 
 #ifdef FILESYS_NEEDED
