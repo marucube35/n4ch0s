@@ -1,8 +1,7 @@
 #ifndef PCB_H
 #define PCB_H
-#include "synch.h"
 #include "thread.h"
-
+#include "synch.h"
 
 class PCB
 {
@@ -18,18 +17,18 @@ private:
 
 public:
     int parentID; // ID của tiến trình cha
-    PCB(int id); // contructor
-    ~PCB();      // deconstructor
+    PCB(int id);  // contructor
+    ~PCB();       // deconstructor
 
     // Nạp chương trình có tên lưu trong biến filename và processID là pid
     int Exec(char *filename, int pid);         // Tạo 1 thread mới có tên là filename và process là pid
     int GetID();                               // Trả về ProcessID của tiến trình gọi thực hiện
     int GetNumWait() { return this->numwait; } // Trả về số lượng tiến trình chờ
 
-    void JoinWait();    // 1. Tiến trình cha đợi tiến trình con kết thúc
-    void ExitWait();    // 4. Tiến trình con kết thúc
-    void JoinRelease(); // 2. Báo cho tiến trình cha thực thi tiếp
-    void ExitRelease(); // 3. Cho phép tiến trình con kết thúc
+    void JoinWait() { joinsem->P(); }       // 1. Tiến trình cha đợi tiến trình con kết thúc
+    void ExitWait() { exitsem->V(); }    // 4. Tiến trình con kết thúc
+    void JoinRelease() { joinsem->V(); }    // 2. Báo cho tiến trình cha thực thi tiếp
+    void ExitRelease() { exitsem->V(); } // 3. Cho phép tiến trình con kết thúc
 
     void IncNumWait() { this->numwait++; } // Tăng số tiến trình chờ
     void DecNumWait() { this->numwait--; } // Giảm số tiến trình chờ

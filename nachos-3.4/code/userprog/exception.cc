@@ -163,6 +163,30 @@ void ExceptionHandler(ExceptionType which)
             delete filename;
             break;
         }
+        case SC_Join:
+        {
+            //* Đọc id của tiến trình cần Join từ thanh ghi r4
+            int pid = machine->ReadRegister(4);
+
+            //* Gọi thực hiện pTab->JoinUpdate(id)
+            int exitcode = pTab->JoinUpdate(pid);
+
+            machine->WriteRegister(2, exitcode);
+
+            break;
+        }
+        case SC_Exit:
+        {
+            //* Đọc exitcode từ thanh ghi r4
+            int exitcode = machine->ReadRegister(4);
+
+            //* Gọi thực hiện pTab->ExitUpdate(exitcode)
+            pTab->ExitUpdate(exitcode);
+
+            machine->WriteRegister(2, exitcode);
+
+            break;
+        }
         case SC_Create:
         {
             int virtAddr;

@@ -20,8 +20,8 @@ public:
     ~PTable();        // Giải phóng bộ nhớ
 
     int ExecUpdate(char *filename); // Xử lý cho system call SC_Exit
-    int ExitUpdate(int ec);         // Xử lý cho system call SC_Exit
-    int JoinUpdate(int id);         // Xử lý cho system call SC_Join
+    int ExitUpdate(int exitcode);   // Xử lý cho system call SC_Exit
+    int JoinUpdate(int pid);        // Xử lý cho system call SC_Join
 
     int GetFreeSlot();          // Tìm free slot để lưu thông tin cho tiến trình mới
     bool IsExist(int pid);      // Kiểm tra xem có tồn tại processID này không

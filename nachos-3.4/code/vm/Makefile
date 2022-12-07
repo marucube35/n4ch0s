@@ -381,9 +381,9 @@ bitmap.o: ../userprog/bitmap.cc /usr/include/stdc-predef.h \
  /usr/include/i386-linux-gnu/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h ../filesys/openfile.h
 pcb.o: ../userprog/pcb.cc /usr/include/stdc-predef.h ../userprog/pcb.h \
- ../threads/synch.h ../threads/copyright.h ../threads/thread.h \
- ../threads/utility.h ../threads/bool.h ../machine/sysdep.h \
- ../threads/copyright.h /usr/include/stdio.h /usr/include/features.h \
+ ../threads/thread.h ../threads/copyright.h ../threads/utility.h \
+ ../threads/bool.h ../machine/sysdep.h ../threads/copyright.h \
+ /usr/include/stdio.h /usr/include/features.h \
  /usr/include/i386-linux-gnu/sys/cdefs.h \
  /usr/include/i386-linux-gnu/bits/wordsize.h \
  /usr/include/i386-linux-gnu/gnu/stubs.h \
@@ -396,13 +396,13 @@ pcb.o: ../userprog/pcb.cc /usr/include/stdc-predef.h ../userprog/pcb.h \
  /usr/include/i386-linux-gnu/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h ../machine/machine.h ../threads/utility.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
- ../filesys/openfile.h ../threads/list.h ../threads/thread.h \
- ../threads/system.h ../machine/interrupt.h ../threads/list.h \
- ../threads/scheduler.h ../machine/stats.h ../machine/timer.h \
- ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../userprog/sem.h ../userprog/ptable.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/addrspace.h
+ ../filesys/openfile.h ../threads/synch.h ../threads/thread.h \
+ ../threads/list.h ../threads/system.h ../machine/interrupt.h \
+ ../threads/list.h ../threads/scheduler.h ../machine/stats.h \
+ ../machine/timer.h ../threads/synchcons.h ../machine/console.h \
+ ../userprog/bitmap.h ../threads/synch.h ../userprog/stable.h \
+ ../userprog/bitmap.h ../userprog/sem.h ../userprog/ptable.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../userprog/addrspace.h
 ptable.o: ../userprog/ptable.cc /usr/include/stdc-predef.h \
  ../userprog/ptable.h ../userprog/bitmap.h ../threads/copyright.h \
  ../threads/utility.h ../threads/copyright.h ../threads/bool.h \

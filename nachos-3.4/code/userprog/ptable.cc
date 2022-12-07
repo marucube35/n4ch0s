@@ -62,6 +62,61 @@ int PTable::ExecUpdate(char *filename)
     return pid;
 }
 
+int PTable::JoinUpdate(int pid)
+{
+    //* Kiểm tra tính hợp lệ của processID pid
+    int index = IsExist(pid);
+    if (index < 0)
+    {
+        printf("PTable::JoinUpdate: Process %d does not exist\n", pid);
+        return -1;
+    }
+
+    //* Kiểm tra tiến trình gọi Join có phải là cha của tiến trình có processID là id hay không
+    if (currentThread->pid != pcb[index]->parentID)
+    {
+        printf("PTable::JoinUpdate: Process %d is not parent of process %d\n", currentThread->pid, pid);
+        return -1;
+    }
+
+    //* Tăng numwait
+    pcb[index]->IncNumWait();
+
+    //* Gọi JoinWait để chờ tiến trình con thực hiện xong
+    pcb[index]->JoinWait();
+
+    int exitcode = pcb[index]->GetExitCode();
+
+    //* Cho phép tiến trình con thoát
+    pcb[index]->ExitRelease();
+
+    return exitcode;
+}
+
+int PTable::ExitUpdate(int exitcode)
+{
+    //* Lấy processID của tiến trình hiện tại
+    int pid = currentThread->pid;
+    if (strcmp(currentThread->getName(), "main") == 0)
+    {
+        interrupt->Halt();
+    }
+    else
+    {
+        //* Đặt exitcode cho tiến trình gọi.
+        pcb[pid]->SetExitCode(exitcode);
+
+        //* Giải phóng tiến trình cha đang đợi nó (nếu có).
+        pcb[pid]->JoinRelease();
+
+        //* Xin tiến trình cha cho phép thoát.
+        pcb[pid]->ExitWait();
+    }
+
+    Remove(pid);
+    return exitcode;
+}
+
 int PTable::GetFreeSlot()
 {
     bmsem->P();
