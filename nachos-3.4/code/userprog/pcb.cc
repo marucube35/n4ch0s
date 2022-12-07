@@ -1,13 +1,8 @@
 #include "pcb.h"
+#include "system.h"
+#include "addrspace.h"
 
-PCB::PCB()
-{
-    joinsem = new Semaphore("joinsem", 1);
-    exitsem = new Semaphore("exitsem", 1);
-    multex = new Semaphore("multex", 1);
-    exitcode = 0;
-    numwait = 0;
-}
+void StartProcess_2(int pid);
 
 PCB::PCB(int id)
 {
@@ -16,7 +11,7 @@ PCB::PCB(int id)
     multex = new Semaphore("multex", 1);
     exitcode = 0;
     numwait = 0;
-    parentID = id;
+    pid = id;
 }
 
 PCB::~PCB()
@@ -26,7 +21,54 @@ PCB::~PCB()
     delete multex;
 }
 
+int PCB::Exec(char *name, int pid)
+{
+    //* Tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
+    //* Bắt đầu critical section
+    multex->P();
+
+    //* Tạo thread mới có tên là name
+    thread = new Thread(name);
+
+    //* Kiểm tra xem thread có được tạo thành công hay không
+    if (!thread)
+    {
+        printf("PCB::Exec: Not enough memory for creating thread %s", name);
+        //* Kết thúc critical section
+        multex->V();
+    }
+
+    //* Đặt processID của tiến trình mới tạo là pid
+    thread->pid = pid;
+
+    //* Đặt parentID của tiến trình mới tạo là processID của tiến trình gọi thực thi Exec
+    thread->parentID = currentThread->pid;
+
+    //* Gọi thực thi Fork với hàm StartProcess_2
+    thread->Fork(StartProcess_2, pid);
+
+    return pid;
+}
+
 int PCB::GetID()
 {
     return pid;
+}
+
+void StartProcess_2(int pid)
+{
+    //* Lấy tên tiến trình dựa trên pid
+    char *filename = pTab->GetFileName(pid);
+
+    //* Khởi tạo vùng nhớ để lưu code
+    AddrSpace *space = new AddrSpace(filename);
+    currentThread->space = space;
+
+    space->InitRegisters(); // set the initial register values
+    space->RestoreState();  // load page table register
+
+    machine->Run(); // jump to the user progam
+    ASSERT(FALSE);  // machine->Run never returns;
+                    // the address space exits
+                    // by doing the syscall "exit"
 }

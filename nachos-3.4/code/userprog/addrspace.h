@@ -14,13 +14,13 @@
 #define ADDRSPACE_H
 
 #include "copyright.h"
-#include "filesys.h"
+#include "openfile.h"
 
 #define UserStackSize		1024 	// increase this as necessary!
 
 class AddrSpace {
   public:
-    AddrSpace(OpenFile *executable);	// Create an address space,
+    AddrSpace(char* filename);	// Create an address space,
 					// initializing it with the program
 					// stored in the file "executable"
     ~AddrSpace();			// De-allocate an address space

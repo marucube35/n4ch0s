@@ -1,8 +1,8 @@
 #ifndef PTABLE_H
 #define PTABLE_H
 #include "bitmap.h"
-#include "pcb.h"
 #include "synch.h"
+#include "pcb.h"
 #define MAX_PROCESS 10
 
 class PTable
@@ -19,9 +19,9 @@ public:
                       // Gán giá trị ban đầu là của mỗi phần tử là null
     ~PTable();        // Giải phóng bộ nhớ
 
-    int ExecUpdate(char *name); // Xử lý cho system call SC_Exit
-    int ExitUpdate(int ec);     // Xử lý cho system call SC_Exit
-    int JoinUpdate(int id);     // Xử lý cho system call SC_Join
+    int ExecUpdate(char *filename); // Xử lý cho system call SC_Exit
+    int ExitUpdate(int ec);         // Xử lý cho system call SC_Exit
+    int JoinUpdate(int id);         // Xử lý cho system call SC_Join
 
     int GetFreeSlot();          // Tìm free slot để lưu thông tin cho tiến trình mới
     bool IsExist(int pid);      // Kiểm tra xem có tồn tại processID này không

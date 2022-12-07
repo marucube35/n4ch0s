@@ -60,13 +60,21 @@ SwapHeader(NoffHeader *noffH)
 //	"executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
 
-AddrSpace::AddrSpace(OpenFile *executable)
+AddrSpace::AddrSpace(char* filename)
 {
     NoffHeader noffH;
     unsigned int i, size, j;
     unsigned int numCodePage, numDataPage;  //* Số trang cho phần code và phần initData
     int lastCodePageSize, lastDataPageSize; //* Kích thước trang cuối của phần code và phần data
     int firstDataPageSize, tempDataSize;    //* Kích thước trang đầu phần initData và kích thước data tạm
+
+    //* Kiểm tra sự tồn tại của file chương trình
+    OpenFile *executable = fileSystem->Open(filename);
+    if (executable == NULL)
+    {
+        printf("Unable to open file %s\n", filename);
+        return;
+    }
 
     //* Đọc header của file chương trình cần chạy
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);

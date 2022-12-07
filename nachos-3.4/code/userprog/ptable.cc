@@ -1,4 +1,6 @@
 #include "ptable.h"
+#include "openfile.h"
+#include "system.h"
 
 PTable::PTable(int size)
 {
@@ -21,6 +23,45 @@ PTable::~PTable()
     delete[] pcb;
     delete bm;
     delete bmsem;
+}
+
+int PTable::ExecUpdate(char *filename)
+{
+    //* Tránh tình trạng nạp 2 tiến trình cùng 1 lúc
+    bmsem->P();
+
+    //* Kiểm tra sự tồn tại của chương trình "name"
+    OpenFile *executable = fileSystem->Open(filename);
+    if (executable == NULL)
+    {
+        printf("PTable::ExecUpdate: Unable to open file %s\n", filename);
+        return -1;
+    }
+
+    //* So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó
+    if (strcmp(currentThread->getName(), filename) == 0)
+    {
+        printf("PTable::ExecUpdate: Unable to execute itself %s\n", filename);
+        return -1;
+    }
+
+    //* Tìm slot trống trong bảng PTable
+    int index = GetFreeSlot();
+    if (index < 0)
+    {
+        printf("PTable::ExecUpdate: No enough space for new process %s\n", filename);
+        return -1;
+    }
+
+    pcb[index] = new PCB(index);
+    pcb[index]->parentID = currentThread->pid;
+    int pid = pcb[index]->Exec(filename, index);
+
+    //* Thoát khỏi critical section
+    bmsem->V();
+
+    //* Trả về kết quả thực thi của PCB->Exec()
+    return pid;
 }
 
 int PTable::GetFreeSlot()
@@ -66,7 +107,7 @@ void PTable::Remove(int pid)
     }
 }
 
-char* PTable::GetFileName(int id)
+char *PTable::GetFileName(int id)
 {
     for (int i = 0; i < psize; i++)
     {

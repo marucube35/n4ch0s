@@ -1,7 +1,8 @@
 #ifndef PCB_H
 #define PCB_H
-#include "thread.h"
 #include "synch.h"
+#include "thread.h"
+
 
 class PCB
 {
@@ -9,6 +10,7 @@ private:
     Semaphore *joinsem; // semaphore cho quá trình join
     Semaphore *exitsem; // semaphore cho quá trình exit
     Semaphore *multex;  // semaphore cho quá trình truy xuất độc quyền
+    Thread *thread;     // thread của tiến trình
     int numwait;        // số tiến trình con đã join
     int pid;            // processID
     char *filename;     // tên tiến trình
@@ -16,7 +18,6 @@ private:
 
 public:
     int parentID; // ID của tiến trình cha
-    PCB();
     PCB(int id); // contructor
     ~PCB();      // deconstructor
 

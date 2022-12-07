@@ -140,6 +140,29 @@ void ExceptionHandler(ExceptionType which)
             interrupt->Halt();
             break;
         }
+        case SC_Exec:
+        {
+            int MaxProgramLength = 32;
+            int virtAddr = machine->ReadRegister(4);
+            char *filename = UserToSystem(virtAddr, MaxProgramLength + 1);
+
+            //* Trường hợp không đủ vùng nhớ để lưu tên chương trình
+            if (filename == NULL)
+            {
+                printf("SC_Exec: Not enough memory in system.\n");
+
+                machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
+                delete filename;
+                return;
+            }
+
+            //* Tạo tiến trình mới
+            int pid = pTab->ExecUpdate(filename);
+            machine->WriteRegister(2, pid); // trả về giá trị pid cho thanh ghi r2 (thành công)
+
+            delete filename;
+            break;
+        }
         case SC_Create:
         {
             int virtAddr;
