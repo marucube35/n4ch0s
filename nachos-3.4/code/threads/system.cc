@@ -27,10 +27,11 @@ FileSystem *fileSystem;
 SynchDisk *synchDisk;
 #endif
 
-#ifdef USER_PROGRAM // requires either FILESYS or FILESYS_STUB
-Machine *machine;   // user program memory and registers
+#ifdef USER_PROGRAM          // requires either FILESYS or FILESYS_STUB
+Machine *machine;            // user program memory and registers
 SynchConsole *gSynchConsole; // synch console
-BitMap *gPhysPageBitMap;		// bitmap
+BitMap *gPhysPageBitMap;     // bitmap
+Semaphore *addrLock;         // address lock
 #endif
 
 #ifdef NETWORK
@@ -158,6 +159,7 @@ void Initialize(int argc, char **argv)
     machine = new Machine(debugUserProg); // this must come first
     gSynchConsole = new SynchConsole();
     gPhysPageBitMap = new BitMap(NumPhysPages);
+    addrLock = new Semaphore("addrLock", 1);
 #endif
 
 #ifdef FILESYS
@@ -186,8 +188,11 @@ void Cleanup()
 
 #ifdef USER_PROGRAM
     delete machine;
+
+    //* Giải phóng bộ nhớ khi user program kết thúc
     delete gSynchConsole;
     delete gPhysPageBitMap;
+    delete addrLock;
 #endif
 
 #ifdef FILESYS_NEEDED

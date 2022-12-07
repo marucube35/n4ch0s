@@ -30,8 +30,6 @@ extern Interrupt *interrupt;		// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 
-
-
 #ifdef USER_PROGRAM
 #include "machine.h"
 extern Machine *machine; // user program memory and registers
@@ -39,8 +37,12 @@ extern Machine *machine; // user program memory and registers
 #include "synchcons.h"
 extern SynchConsole *gSynchConsole; // synch console
 
+// * Sử dụng biến toàn cục gPhysPageBitMap để quản lý các frames trong bộ nhớ
 #include "bitmap.h"
 extern BitMap *gPhysPageBitMap;		// bitmap
+
+#include "synch.h"
+extern Semaphore *addrLock;	// lock
 #endif
 
 #ifdef FILESYS_NEEDED // FILESYS or FILESYS_STUB
