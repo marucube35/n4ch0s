@@ -199,9 +199,7 @@ void Cleanup()
     delete gPhysPageBitMap;
     delete addrLock;
     delete semTab;
-    
-    //TODO: sửa lỗi khi giải phóng vùng nhớ
-    // delete pTab;
+    delete pTab;
 #endif
 
 #ifdef FILESYS_NEEDED

@@ -132,6 +132,8 @@ int PTable::ExitUpdate(int exitcode)
 
     //* Đặt exitcode cho tiến trình gọi.
     pcb[pid]->SetExitCode(exitcode);
+
+    //* Giảm numwait
     pcb[pcb[pid]->parentID]->DecNumWait();
 
     //* Giải phóng tiến trình cha đang đợi nó (nếu có).
