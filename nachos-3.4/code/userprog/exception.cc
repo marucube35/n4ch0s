@@ -142,9 +142,13 @@ void ExceptionHandler(ExceptionType which)
         }
         case SC_Exec:
         {
+            printf("---------------------------------\n");
+
             int MaxProgramLength = 32;
             int virtAddr = machine->ReadRegister(4);
             char *filename = UserToSystem(virtAddr, MaxProgramLength + 1);
+
+            printf("SC_Exec: Executing file %s\n", filename);
 
             //* Trường hợp không đủ vùng nhớ để lưu tên chương trình
             if (filename == NULL)
@@ -158,6 +162,8 @@ void ExceptionHandler(ExceptionType which)
 
             //* Tạo tiến trình mới
             int pid = pTab->ExecUpdate(filename);
+
+            printf("SC_Exec: Create new process with pid %d\n", pid);
             machine->WriteRegister(2, pid); // trả về giá trị pid cho thanh ghi r2 (thành công)
 
             delete filename;
@@ -165,8 +171,11 @@ void ExceptionHandler(ExceptionType which)
         }
         case SC_Join:
         {
+            printf("---------------------------------\n");
+
             //* Đọc id của tiến trình cần Join từ thanh ghi r4
             int pid = machine->ReadRegister(4);
+            printf("SC_Join: Join process with pid %d\n", pid);
 
             //* Gọi thực hiện pTab->JoinUpdate(id)
             int exitcode = pTab->JoinUpdate(pid);
@@ -177,14 +186,23 @@ void ExceptionHandler(ExceptionType which)
         }
         case SC_Exit:
         {
+            printf("---------------------------------\n");
+
             //* Đọc exitcode từ thanh ghi r4
-            int exitcode = machine->ReadRegister(4);
+            int exitstatus = machine->ReadRegister(4);
+            printf("SC_Exit: Exit process with exitstatus %d\n", exitstatus);
 
-            //* Gọi thực hiện pTab->ExitUpdate(exitcode)
-            pTab->ExitUpdate(exitcode);
+            if (exitstatus != 0)
+            {
+                AdvanceProgramCounter();
+                return;
+            }
 
-            machine->WriteRegister(2, exitcode);
+            //* Gọi thực hiện pTab->ExitUpdate(exitstatus)
+            pTab->ExitUpdate(exitstatus);
 
+            machine->WriteRegister(2, exitstatus);
+            currentThread->Finish();
             break;
         }
         case SC_Create:

@@ -1,4 +1,5 @@
 *.o
 **.coff
 **/nachos
+*.coff
 **/Makefile

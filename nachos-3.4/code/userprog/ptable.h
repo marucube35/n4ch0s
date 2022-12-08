@@ -1,8 +1,8 @@
 #ifndef PTABLE_H
 #define PTABLE_H
 #include "bitmap.h"
-#include "synch.h"
 #include "pcb.h"
+#include "synch.h"
 #define MAX_PROCESS 10
 
 class PTable
@@ -27,6 +27,7 @@ public:
     bool IsExist(int pid);      // Kiểm tra xem có tồn tại processID này không
     void Remove(int pid);       // Khi tiến trình kết thúc, delete processID ra khỏi mảng quản lý nó
     char *GetFileName(int pid); // Trả về tên của tiến trình
+    void Print();               // In ra danh sách các tiến trình đang chạy
 };
 
 #endif
