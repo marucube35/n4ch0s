@@ -7,5 +7,4 @@ int main()
 	{
 		PrintChar('A');
 	}
-	PrintChar('\n');
 }

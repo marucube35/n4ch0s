@@ -62,25 +62,19 @@ SwapHeader(NoffHeader *noffH)
 
 AddrSpace::AddrSpace(char* filename)
 {
-    printf("---------------------------------\n");
-
     NoffHeader noffH;
     unsigned int i, size, j;
     unsigned int numCodePage, numDataPage;  //* Số trang cho phần code và phần initData
     int lastCodePageSize, lastDataPageSize; //* Kích thước trang cuối của phần code và phần data
     int firstDataPageSize, tempDataSize;    //* Kích thước trang đầu phần initData và kích thước data tạm
 
-    printf("AddrSpace::AddrSpace: start loading file %s\n", filename);
-
     //* Kiểm tra sự tồn tại của file chương trình
     OpenFile *executable = fileSystem->Open(filename);
     if (executable == NULL)
     {
-        printf("AddrSpace::AddrSpace: Unable to open file %s\n", filename);
+        printf("\n[AddrSpace::AddrSpace]: Unable to open file %s\n", filename);
         return;
     }
-
-    printf("AddrSpace::AddrSpace: Open file %s successfully\n", filename);
 
     //* Đọc header của file chương trình cần chạy
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
@@ -101,7 +95,7 @@ AddrSpace::AddrSpace(char* filename)
     //* Kiểm tra xem có đủ số trang bộ nhớ để nạp chương trình hay không
     if (numPages > gPhysPageBitMap->NumClear())
     {
-        printf("AddrSpace::AddrSpace: not enough memory for new process\n");
+        printf("\n[AddrSpace::AddrSpace]: not enough memory for new process\n");
 
         numPages = 0;
         delete executable;

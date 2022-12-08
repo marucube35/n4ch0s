@@ -37,10 +37,6 @@ PTable::~PTable()
 
 int PTable::ExecUpdate(char *filename)
 {
-    printf("---------------------------------\n");
-    printf("PTable::ExecUpdate: Current thread name: %s\n", currentThread->getName());
-    printf("PTable::ExecUpdate: Current thread pid: %d\n", currentThread->pid);
-
     //* Tránh tình trạng nạp 2 tiến trình cùng 1 lúc
     bmsem->P();
 
@@ -48,16 +44,14 @@ int PTable::ExecUpdate(char *filename)
     OpenFile *executable = fileSystem->Open(filename);
     if (executable == NULL)
     {
-        printf("PTable::ExecUpdate: Unable to open file %s\n", filename);
+        printf("\n[PTable::ExecUpdate]: Unable to open file %s\n", filename);
         return -1;
     }
-
-    printf("PTable::ExecUpdate: Executing file %s\n", filename);
 
     //* So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó
     if (strcmp(currentThread->getName(), filename) == 0)
     {
-        printf("PTable::ExecUpdate: Unable to execute itself %s\n", filename);
+        printf("\n[PTable::ExecUpdate]: Unable to execute itself %s\n", filename);
         bmsem->V();
         return -1;
     }
@@ -66,18 +60,16 @@ int PTable::ExecUpdate(char *filename)
     int pid = GetFreeSlot();
     if (pid < 0)
     {
-        printf("PTable::ExecUpdate: No enough space for new process %s\n", filename);
+        printf("\n[PTable::ExecUpdate]: No enough space for new process %s\n", filename);
         bmsem->V();
         return -1;
     }
 
-    printf("PTable::ExecUpdate: Create new process with pid %d\n", pid);
+    // printf("\n[PTable::ExecUpdate]: Creating process %s with processID = %d\n", filename, pid);
 
     pcb[pid] = new PCB(pid);
     pcb[pid]->SetFileName(filename);
     pcb[pid]->parentID = currentThread->pid;
-
-    printf("PTable::ExecUpdate: Executing file %s with pid %d\n", filename, pid);
 
     pcb[pid]->Exec(filename, pid);
 
@@ -90,28 +82,21 @@ int PTable::ExecUpdate(char *filename)
 
 int PTable::JoinUpdate(int pid)
 {
-    printf("---------------------------------\n");
-    printf("PTable::ExecUpdate: Current thread name: %s\n", currentThread->getName());
-    printf("PTable::ExecUpdate: Current thread pid: %d\n", currentThread->pid);
+    // printf("\n[PTable::JoinUpdate]: Process %d is being joined\n", pid);
 
     //* Kiểm tra tính hợp lệ của processID pid
     if (!IsExist(pid))
     {
-        printf("PTable::JoinUpdate: Process %d does not exist\n", pid);
+        printf("\n[PTable::JoinUpdate]: Process %d does not exist\n", pid);
         return -1;
     }
-
-    printf("PTable::JoinUpdate: Process %d exists\n", pid);
 
     //* Kiểm tra tiến trình gọi Join có phải là cha của tiến trình có processID là id hay không
     if (currentThread->pid != pcb[pid]->parentID)
     {
-        printf("PTable::JoinUpdate: Process %d is not parent of process %d\n", currentThread->pid, pid);
+        printf("\n[PTable::JoinUpdate]: Process %d is not parent of process %d\n", currentThread->pid, pid);
         return -1;
     }
-
-    printf("PTable::JoinUpdate: Process %d is parent of process %d\n", currentThread->pid, pid);
-    printf("PTable::JoinUpdate: Process %d is being joined\n", pid);
 
     //* Tăng numwait
     pcb[pcb[pid]->parentID]->IncNumWait();
@@ -129,25 +114,21 @@ int PTable::JoinUpdate(int pid)
 
 int PTable::ExitUpdate(int exitcode)
 {
-    printf("---------------------------------\n");
-    printf("PTable::ExecUpdate: Current thread name: %s\n", currentThread->getName());
-    printf("PTable::ExecUpdate: Current thread pid: %d\n", currentThread->pid);
+    // printf("\n[PTable::ExitUpdate]: Process %d is being exited\n", currentThread->pid);
 
     //* Lấy processID của tiến trình hiện tại
     int pid = currentThread->pid;
     if (pid == 0)
     {
-        printf("PTable::ExitUpdate: Exit main process\n");
+        printf("\n[PTable::ExitUpdate]: Exit main process\n");
         interrupt->Halt();
         return 0;
     }
     if (!IsExist(pid))
     {
-        printf("PTable::ExitUpdate: Process %d does not exist\n", pid);
+        printf("\n[PTable::ExitUpdate]: Process %d does not exist\n", pid);
         return -1;
     }
-
-    printf("PTable::ExitUpdate: Process %d is being exited\n", pid);
 
     //* Đặt exitcode cho tiến trình gọi.
     pcb[pid]->SetExitCode(exitcode);
