@@ -1,7 +1,6 @@
 #include "copyright.h"
 #include "syscall.h"
 #define bufferSize 255
-
 int main()
 {
     int number;
