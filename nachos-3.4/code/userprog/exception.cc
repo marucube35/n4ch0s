@@ -106,28 +106,28 @@ void ExceptionHandler(ExceptionType which)
     switch (which)
     {
     case NoException:
-        printf("[Log]: Everything ok!\n");
+        printf("\n[Log]: Everything ok!\n");
         return;
     case PageFaultException:
-        printf("[Error]: No valid translation found\n");
+        printf("\n[Error]: No valid translation found\n");
         interrupt->Halt();
     case ReadOnlyException:
-        printf("[Error]: Write attempted to page marked  'read - only'\n");
+        printf("\n[Error]: Write attempted to page marked  'read - only'\n");
         interrupt->Halt();
     case BusErrorException:
-        printf("[Error]: Translation resulted in an invalid physical address\n");
+        printf("\n[Error]: Translation resulted in an invalid physical address\n");
         interrupt->Halt();
     case AddressErrorException:
-        printf("[Error]: Unaligned reference or one that was beyond the end of the address space\n");
+        printf("\n[Error]: Unaligned reference or one that was beyond the end of the address space\n");
         interrupt->Halt();
     case OverflowException:
-        printf("[Error]: Integer overflow in add or sub.\n");
+        printf("\n[Error]: Integer overflow in add or sub.\n");
         interrupt->Halt();
     case IllegalInstrException:
-        printf("[Error]: Unimplemented or reserved instr.\n");
+        printf("\n[Error]: Unimplemented or reserved instr.\n");
         interrupt->Halt();
     case NumExceptionTypes:
-        printf("[Error]: Number exception types\n");
+        printf("\n[Error]: Number exception types\n");
         interrupt->Halt();
     case SyscallException:
         switch (type)
@@ -140,17 +140,68 @@ void ExceptionHandler(ExceptionType which)
             interrupt->Halt();
             break;
         }
+        case SC_Exec:
+        {
+            int MaxProgramLength = 32;
+            int virtAddr = machine->ReadRegister(4);
+            char *filename = UserToSystem(virtAddr, MaxProgramLength + 1);
+
+            //* Trường hợp không đủ vùng nhớ để lưu tên chương trình
+            if (filename == NULL)
+            {
+                printf("\n[SC_Exec]: Not enough memory in system.\n");
+
+                machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
+
+                delete filename;
+                AdvanceProgramCounter();
+                return;
+            }
+
+            //* Tạo tiến trình mới
+            int pid = pTab->ExecUpdate(filename);
+            machine->WriteRegister(2, pid); // trả về giá trị pid cho thanh ghi r2 (thành công)
+
+            delete filename;
+            break;
+        }
+        case SC_Join:
+        {
+            //* Đọc id của tiến trình cần Join từ thanh ghi r4
+            int pid = machine->ReadRegister(4);
+
+            //* Gọi thực hiện pTab->JoinUpdate(id)
+            int exitcode = pTab->JoinUpdate(pid);
+
+            machine->WriteRegister(2, exitcode);
+
+            break;
+        }
+        case SC_Exit:
+        {
+            //* Đọc exitcode từ thanh ghi r4
+            int exitstatus = machine->ReadRegister(4);
+
+            if (exitstatus != 0)
+            {
+                AdvanceProgramCounter();
+                return;
+            }
+
+            //* Gọi thực hiện pTab->ExitUpdate(exitstatus)
+            pTab->ExitUpdate(exitstatus);
+
+            machine->WriteRegister(2, exitstatus);
+            currentThread->Finish();
+            break;
+        }
         case SC_Create:
         {
             int virtAddr;
             char *fileName;
 
-            DEBUG('a', "SC_Create call ...\n");
-            DEBUG('a', "Reading virtual address of filename\n");
-
             // Lấy tham số tên tập tin từ thanh ghi r4
             virtAddr = machine->ReadRegister(4);
-            DEBUG('a', "Reading filename.\n");
 
             // Lấy dữ liệu từ vùng nhớ thông qua địa chỉ ảo
             int MaxFileLength = 32;
@@ -159,30 +210,196 @@ void ExceptionHandler(ExceptionType which)
             // Trường hợp không đủ vùng nhớ để lưu tên file
             if (fileName == NULL)
             {
-                DEBUG('a', "Not enough memory in system.\n");
-                printf("Not enough memory in system.\n");
+                printf("\n[SC_Create]: Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
+
                 delete fileName;
+                AdvanceProgramCounter();
                 return;
             }
 
-            DEBUG('a', "Finish reading filename.\n");
-            printf("\nCreate file: %s\n", fileName);
+            printf("\n[SC_Create]: Create file: %s\n", fileName);
 
             // Trường hợp không thể tạo file
             if (!fileSystem->Create(fileName, 0))
             {
-                printf("Error create file '%s'\n", fileName);
+                printf("\n[SC_Create]: Error create file '%s'\n", fileName);
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
                 delete fileName;
+                AdvanceProgramCounter();
                 return;
             }
 
             machine->WriteRegister(2, 0); // trả về giá trị 0 cho thanh ghi r2 (thành công)
             delete fileName;
             break;
+        }
+        case SC_Open:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            int type = machine->ReadRegister(5);
+            int MaxFileLength = 32;
+            char *filename = UserToSystem(virtAddr, MaxFileLength);
+
+            int freeSlot = fileSystem->FindFreeSlot();
+            if (freeSlot != -1)
+            {
+                if (type == 0 || type == 1)
+                {
+                    if ((fileSystem->openf[freeSlot] = fileSystem->Open(filename, type)) != NULL)
+                    {
+                        machine->WriteRegister(2, freeSlot);
+                    }
+                }
+                else if (type == 2)
+                {
+                    machine->WriteRegister(2, 0);
+                }
+                else
+                {
+                    machine->WriteRegister(2, 1);
+                }
+
+                delete[] filename;
+                break;
+            }
+
+            machine->WriteRegister(2, -1);
+            delete[] filename;
+            break;
+        }
+        case SC_Close:
+        {
+            int fid = machine->ReadRegister(4);
+            if (fid >= 0 && fid <= 14)
+            {
+                if (fileSystem->openf[fid])
+                {
+                    delete fileSystem->openf[fid];
+                    fileSystem->openf[fid] = NULL;
+                    machine->WriteRegister(2, 0);
+                    break;
+                }
+            }
+
+            machine->WriteRegister(2, -1);
+            break;
+        }
+        case SC_Read:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            int charcount = machine->ReadRegister(5);
+            int id = machine->ReadRegister(6);
+            int OldPos;
+            int NewPos;
+            char *buf;
+            if (id < 0 || id > 14)
+            {
+                printf("\n[SC_Read]: ID is invalid.\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id] == NULL)
+            {
+                printf("\n[SC_Read]: File is no longer existed\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id]->type == 3)
+            {
+                printf("\n[SC_Read]: Cannot read stdout file.\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            OldPos = fileSystem->openf[id]->GetCurrentPos();
+            buf = UserToSystem(virtAddr, charcount);
+            if (fileSystem->openf[id]->type == 2)
+            {
+
+                int size = gSynchConsole->Read(buf, charcount);
+                SystemToUser(virtAddr, size, buf);
+                machine->WriteRegister(2, size);
+                delete buf;
+                AdvanceProgramCounter();
+                return;
+            }
+            if ((fileSystem->openf[id]->Read(buf, charcount)) > 0)
+            {
+                NewPos = fileSystem->openf[id]->GetCurrentPos();
+                SystemToUser(virtAddr, NewPos - OldPos, buf);
+                machine->WriteRegister(2, NewPos - OldPos);
+            }
+            else
+            {
+                machine->WriteRegister(2, -2);
+            }
+
+            delete buf;
+            break;
+        }
+        case SC_Write:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            int charcount = machine->ReadRegister(5);
+            int id = machine->ReadRegister(6);
+            int OldPos;
+            int NewPos;
+            char *buf;
+
+            if (id < 0 || id > 14)
+            {
+                printf("\n[SC_Write]: ID is invalid\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id] == NULL)
+            {
+                printf("\n[SC_Write]: This file is no longer existed\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id]->type == 1 || fileSystem->openf[id]->type == 2)
+            {
+                printf("\n[SC_Write]: This file has no writing permission\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            OldPos = fileSystem->openf[id]->GetCurrentPos();
+            buf = UserToSystem(virtAddr, charcount);
+            if (fileSystem->openf[id]->type == 0)
+            {
+                if ((fileSystem->openf[id]->Write(buf, charcount)) > 0)
+                {
+                    NewPos = fileSystem->openf[id]->GetCurrentPos();
+                    machine->WriteRegister(2, NewPos - OldPos);
+                    delete buf;
+                    AdvanceProgramCounter();
+                    return;
+                }
+            }
+            if (fileSystem->openf[id]->type == 3)
+            {
+                int i = 0;
+                while (buf[i] != 0 && buf[i] != '\n')
+                {
+                    gSynchConsole->Write(buf + i, 1);
+                    i++;
+                }
+                buf[i] = '\n';
+                gSynchConsole->Write(buf + i, 1);
+                machine->WriteRegister(2, i - 1);
+                delete buf;
+                AdvanceProgramCounter();
+                return;
+            }
         }
         case SC_ReadInt:
         {
@@ -196,7 +413,7 @@ void ExceptionHandler(ExceptionType which)
                 {
                     if (buffer[i] < '0' || buffer[i] > '9')
                     {
-                        throw "Invalid input!\n";
+                        throw "\n[SC_ReadInt]: Invalid input!\n";
                     }
                 }
 
@@ -206,6 +423,7 @@ void ExceptionHandler(ExceptionType which)
             {
                 printf("%s", msg);
                 delete buffer;
+                AdvanceProgramCounter();
                 return;
             }
 
@@ -273,7 +491,7 @@ void ExceptionHandler(ExceptionType which)
         }
 
         default:
-            printf("\nUnexpected user mode exception (%d %d) \n", which,
+            printf("\n[Error]: Unexpected user mode exception (%d %d) \n", which,
                    type);
             interrupt->Halt();
             break;

@@ -19,8 +19,6 @@ Statistics *stats;           // performance metrics
 Timer *timer;                // the hardware timer device,
                              // for invoking context switches
 
-SynchConsole *gSynchConsole; // synch console
-
 #ifdef FILESYS_NEEDED
 FileSystem *fileSystem;
 #endif
@@ -29,9 +27,13 @@ FileSystem *fileSystem;
 SynchDisk *synchDisk;
 #endif
 
-#ifdef USER_PROGRAM // requires either FILESYS or FILESYS_STUB
-Machine *machine;   // user program memory and registers
-
+#ifdef USER_PROGRAM          // requires either FILESYS or FILESYS_STUB
+Machine *machine;            // user program memory and registers
+SynchConsole *gSynchConsole; // synch console
+BitMap *gPhysPageBitMap;     // bitmap
+Semaphore *addrLock;         // address lock
+PTable *pTab;                // process table
+STable *semTab;              // semaphore table
 #endif
 
 #ifdef NETWORK
@@ -151,6 +153,7 @@ void Initialize(int argc, char **argv)
     // object to save its state.
     currentThread = new Thread("main");
     currentThread->setStatus(RUNNING);
+    currentThread->pid = 0;
 
     interrupt->Enable();
     CallOnUserAbort(Cleanup); // if user hits ctl-C
@@ -158,6 +161,10 @@ void Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine(debugUserProg); // this must come first
     gSynchConsole = new SynchConsole();
+    gPhysPageBitMap = new BitMap(NumPhysPages);
+    addrLock = new Semaphore("addrLock", 1);
+    semTab = new STable();
+    pTab = new PTable(10);
 #endif
 
 #ifdef FILESYS
@@ -186,7 +193,13 @@ void Cleanup()
 
 #ifdef USER_PROGRAM
     delete machine;
+
+    //* Giải phóng bộ nhớ khi user program kết thúc
     delete gSynchConsole;
+    delete gPhysPageBitMap;
+    delete addrLock;
+    delete semTab;
+    delete pTab;
 #endif
 
 #ifdef FILESYS_NEEDED
