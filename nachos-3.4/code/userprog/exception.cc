@@ -152,7 +152,9 @@ void ExceptionHandler(ExceptionType which)
                 printf("\n[SC_Exec]: Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
+
                 delete filename;
+                AdvanceProgramCounter();
                 return;
             }
 
@@ -211,7 +213,9 @@ void ExceptionHandler(ExceptionType which)
                 printf("\n[SC_Create]: Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
+
                 delete fileName;
+                AdvanceProgramCounter();
                 return;
             }
 
@@ -224,12 +228,120 @@ void ExceptionHandler(ExceptionType which)
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
                 delete fileName;
+                AdvanceProgramCounter();
                 return;
             }
 
             machine->WriteRegister(2, 0); // trả về giá trị 0 cho thanh ghi r2 (thành công)
             delete fileName;
             break;
+        }
+        case SC_Open:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            int type = machine->ReadRegister(5);
+            int MaxFileLength = 32;
+            char *filename = UserToSystem(virtAddr, MaxFileLength);
+
+            int freeSlot = fileSystem->FindFreeSlot();
+            if (freeSlot != -1)
+            {
+                if (type == 0 || type == 1)
+                {
+                    if ((fileSystem->openf[freeSlot] = fileSystem->Open(filename, type)) != NULL)
+                    {
+                        machine->WriteRegister(2, freeSlot);
+                    }
+                }
+                else if (type == 2)
+                {
+                    machine->WriteRegister(2, 0);
+                }
+                else
+                {
+                    machine->WriteRegister(2, 1);
+                }
+
+                delete[] filename;
+                break;
+            }
+
+            machine->WriteRegister(2, -1);
+            delete[] filename;
+            break;
+        }
+        case SC_Close:
+        {
+            int fid = machine->ReadRegister(4);
+            if (fid >= 0 && fid <= 14)
+            {
+                if (fileSystem->openf[fid])
+                {
+                    delete fileSystem->openf[fid];
+                    fileSystem->openf[fid] = NULL;
+                    machine->WriteRegister(2, 0);
+                    break;
+                }
+            }
+
+            machine->WriteRegister(2, -1);
+            break;
+        }
+        case SC_Read:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            int charcount = machine->ReadRegister(5);
+            int id = machine->ReadRegister(6);
+            int OldPos;
+            int NewPos;
+            char *buf;
+
+            if (id < 0 || id > 14)
+            {
+                printf("\nID is invalid");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id] == NULL)
+            {
+                printf("File is no longer existed");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id]->type == 3)
+            {
+                printf("\nCannot read stdout file.");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            OldPos = fileSystem->openf[id]->GetCurrentPos();
+            buf = UserToSystem(virtAddr, charcount);
+            if (fileSystem->openf[id]->type == 2)
+            {
+
+                int size = gSynchConsole->Read(buf, charcount);
+                SystemToUser(virtAddr, size, buf);
+                machine->WriteRegister(2, size);
+                delete buf;
+                AdvanceProgramCounter();
+                return;
+            }
+            if ((fileSystem->openf[id]->Read(buf, charcount)) > 0)
+            {
+                NewPos = fileSystem->openf[id]->GetCurrentPos();
+                SystemToUser(virtAddr, NewPos - OldPos, buf);
+                machine->WriteRegister(2, NewPos - OldPos);
+            }
+            else
+            {
+                machine->WriteRegister(2, -2);
+            }
+
+            delete buf;
+            return;
         }
         case SC_ReadInt:
         {
@@ -253,6 +365,7 @@ void ExceptionHandler(ExceptionType which)
             {
                 printf("%s", msg);
                 delete buffer;
+                AdvanceProgramCounter();
                 return;
             }
 
