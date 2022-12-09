@@ -295,24 +295,23 @@ void ExceptionHandler(ExceptionType which)
             int OldPos;
             int NewPos;
             char *buf;
-
             if (id < 0 || id > 14)
             {
-                printf("\nID is invalid");
+                printf("\n[SC_Read]: ID is invalid.\n");
                 machine->WriteRegister(2, -1);
                 AdvanceProgramCounter();
                 return;
             }
             if (fileSystem->openf[id] == NULL)
             {
-                printf("File is no longer existed");
+                printf("\n[SC_Read]: File is no longer existed\n");
                 machine->WriteRegister(2, -1);
                 AdvanceProgramCounter();
                 return;
             }
             if (fileSystem->openf[id]->type == 3)
             {
-                printf("\nCannot read stdout file.");
+                printf("\n[SC_Read]: Cannot read stdout file.\n");
                 machine->WriteRegister(2, -1);
                 AdvanceProgramCounter();
                 return;
@@ -341,7 +340,66 @@ void ExceptionHandler(ExceptionType which)
             }
 
             delete buf;
-            return;
+            break;
+        }
+        case SC_Write:
+        {
+            int virtAddr = machine->ReadRegister(4);
+            int charcount = machine->ReadRegister(5);
+            int id = machine->ReadRegister(6);
+            int OldPos;
+            int NewPos;
+            char *buf;
+
+            if (id < 0 || id > 14)
+            {
+                printf("\n[SC_Write]: ID is invalid\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id] == NULL)
+            {
+                printf("\n[SC_Write]: This file is no longer existed\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            if (fileSystem->openf[id]->type == 1 || fileSystem->openf[id]->type == 2)
+            {
+                printf("\n[SC_Write]: This file has no writing permission\n");
+                machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
+                return;
+            }
+            OldPos = fileSystem->openf[id]->GetCurrentPos();
+            buf = UserToSystem(virtAddr, charcount);
+            if (fileSystem->openf[id]->type == 0)
+            {
+                if ((fileSystem->openf[id]->Write(buf, charcount)) > 0)
+                {
+                    NewPos = fileSystem->openf[id]->GetCurrentPos();
+                    machine->WriteRegister(2, NewPos - OldPos);
+                    delete buf;
+                    AdvanceProgramCounter();
+                    return;
+                }
+            }
+            if (fileSystem->openf[id]->type == 3)
+            {
+                int i = 0;
+                while (buf[i] != 0 && buf[i] != '\n')
+                {
+                    gSynchConsole->Write(buf + i, 1);
+                    i++;
+                }
+                buf[i] = '\n';
+                gSynchConsole->Write(buf + i, 1);
+                machine->WriteRegister(2, i - 1);
+                delete buf;
+                AdvanceProgramCounter();
+                return;
+            }
         }
         case SC_ReadInt:
         {
@@ -355,7 +413,7 @@ void ExceptionHandler(ExceptionType which)
                 {
                     if (buffer[i] < '0' || buffer[i] > '9')
                     {
-                        throw "Invalid input!\n";
+                        throw "\n[SC_ReadInt]: Invalid input!\n";
                     }
                 }
 

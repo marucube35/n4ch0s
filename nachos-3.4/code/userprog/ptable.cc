@@ -120,7 +120,6 @@ int PTable::ExitUpdate(int exitcode)
     int pid = currentThread->pid;
     if (pid == 0)
     {
-        printf("\n[PTable::ExitUpdate]: Exit main process\n");
         interrupt->Halt();
         return 0;
     }
