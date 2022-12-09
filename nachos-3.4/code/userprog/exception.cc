@@ -154,8 +154,7 @@ void ExceptionHandler(ExceptionType which)
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
 
                 delete filename;
-                AdvanceProgramCounter();
-                return;
+                break;
             }
 
             //* Tạo tiến trình mới
@@ -183,16 +182,66 @@ void ExceptionHandler(ExceptionType which)
             int exitstatus = machine->ReadRegister(4);
 
             if (exitstatus != 0)
-            {
-                AdvanceProgramCounter();
-                return;
-            }
+                break;
 
             //* Gọi thực hiện pTab->ExitUpdate(exitstatus)
             pTab->ExitUpdate(exitstatus);
 
             machine->WriteRegister(2, exitstatus);
             currentThread->Finish();
+            break;
+        }
+        case SC_CreateSemaphore:
+        {
+            int virtAddr, initVal, MaxLength = 32;
+            char *name;
+
+            virtAddr = machine->ReadRegister(4);
+            initVal = machine->ReadRegister(5);
+
+            name = UserToSystem(virtAddr, MaxLength + 1);
+
+            int index = semTab->Create(name, initVal);
+
+            machine->WriteRegister(2, index);
+            break;
+        }
+        case SC_Up:
+        {
+            int virtAddr, MaxLength = 32;
+            char *name;
+
+            virtAddr = machine->ReadRegister(4);
+            name = UserToSystem(virtAddr, MaxLength + 1);
+
+            if (!semTab->IsExist(name))
+            {
+                printf("\n[SC_Up]: Semaphore is not exist.\n");
+                machine->WriteRegister(2, -1);
+                break;
+            }
+
+            int result = semTab->Signal(name);
+            machine->WriteRegister(2, result);
+            break;
+        }
+        case SC_Down:
+        {
+            int virtAddr, MaxLength = 32;
+            char *name;
+
+            virtAddr = machine->ReadRegister(4);
+            name = UserToSystem(virtAddr, MaxLength + 1);
+
+            if (!semTab->IsExist(name))
+            {
+                printf("\n[SC_Down]: Semaphore is not exist.\n");
+                machine->WriteRegister(2, -1);
+                break;
+            }
+
+            int result = semTab->Wait(name);
+            machine->WriteRegister(2, result);
             break;
         }
         case SC_Create:
@@ -215,8 +264,7 @@ void ExceptionHandler(ExceptionType which)
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
 
                 delete fileName;
-                AdvanceProgramCounter();
-                return;
+                break;
             }
 
             printf("\n[SC_Create]: Create file: %s\n", fileName);
@@ -228,8 +276,7 @@ void ExceptionHandler(ExceptionType which)
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
                 delete fileName;
-                AdvanceProgramCounter();
-                return;
+                break;
             }
 
             machine->WriteRegister(2, 0); // trả về giá trị 0 cho thanh ghi r2 (thành công)
@@ -299,22 +346,19 @@ void ExceptionHandler(ExceptionType which)
             {
                 printf("\n[SC_Read]: ID is invalid.\n");
                 machine->WriteRegister(2, -1);
-                AdvanceProgramCounter();
-                return;
+                break;
             }
             if (fileSystem->openf[id] == NULL)
             {
-                printf("\n[SC_Read]: File is no longer existed\n");
+                printf("\n[SC_Read]: File is not existed\n");
                 machine->WriteRegister(2, -1);
-                AdvanceProgramCounter();
-                return;
+                break;
             }
             if (fileSystem->openf[id]->type == 3)
             {
                 printf("\n[SC_Read]: Cannot read stdout file.\n");
                 machine->WriteRegister(2, -1);
-                AdvanceProgramCounter();
-                return;
+                break;
             }
             OldPos = fileSystem->openf[id]->GetCurrentPos();
             buf = UserToSystem(virtAddr, charcount);
@@ -325,8 +369,7 @@ void ExceptionHandler(ExceptionType which)
                 SystemToUser(virtAddr, size, buf);
                 machine->WriteRegister(2, size);
                 delete buf;
-                AdvanceProgramCounter();
-                return;
+                break;
             }
             if ((fileSystem->openf[id]->Read(buf, charcount)) > 0)
             {
@@ -355,22 +398,19 @@ void ExceptionHandler(ExceptionType which)
             {
                 printf("\n[SC_Write]: ID is invalid\n");
                 machine->WriteRegister(2, -1);
-                AdvanceProgramCounter();
-                return;
+                break;
             }
             if (fileSystem->openf[id] == NULL)
             {
-                printf("\n[SC_Write]: This file is no longer existed\n");
+                printf("\n[SC_Write]: This file is not existed\n");
                 machine->WriteRegister(2, -1);
-                AdvanceProgramCounter();
-                return;
+                break;
             }
             if (fileSystem->openf[id]->type == 1 || fileSystem->openf[id]->type == 2)
             {
                 printf("\n[SC_Write]: This file has no writing permission\n");
                 machine->WriteRegister(2, -1);
-                AdvanceProgramCounter();
-                return;
+                break;
             }
             OldPos = fileSystem->openf[id]->GetCurrentPos();
             buf = UserToSystem(virtAddr, charcount);
@@ -381,8 +421,7 @@ void ExceptionHandler(ExceptionType which)
                     NewPos = fileSystem->openf[id]->GetCurrentPos();
                     machine->WriteRegister(2, NewPos - OldPos);
                     delete buf;
-                    AdvanceProgramCounter();
-                    return;
+                    break;
                 }
             }
             if (fileSystem->openf[id]->type == 3)
@@ -397,8 +436,7 @@ void ExceptionHandler(ExceptionType which)
                 gSynchConsole->Write(buf + i, 1);
                 machine->WriteRegister(2, i - 1);
                 delete buf;
-                AdvanceProgramCounter();
-                return;
+                break;
             }
         }
         case SC_ReadInt:
@@ -423,8 +461,7 @@ void ExceptionHandler(ExceptionType which)
             {
                 printf("%s", msg);
                 delete buffer;
-                AdvanceProgramCounter();
-                return;
+                break;
             }
 
             machine->WriteRegister(2, number); // trả về giá trị cho thanh ghi r2

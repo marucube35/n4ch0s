@@ -37,6 +37,10 @@
 #define SC_ReadString 15
 #define SC_PrintString 16
 
+#define SC_CreateSemaphore 17
+#define SC_Up 18
+#define SC_Down 19
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -127,12 +131,22 @@ void Fork(void (*func)());
  */
 void Yield();
 
+/*
+    Input/output syscalls
+*/
 int ReadInt();
 void PrintInt(int number);
 char ReadChar();
 void PrintChar(char character);
 void ReadString(char *buffer, int length);
 void PrintString(char *buffer);
+
+/*
+    Semaphore syscalls
+*/
+int CreateSemaphore(char *name, int semval);
+int Up(char* name);
+int Down(char* name);
 
 #endif /* IN_ASM */
 

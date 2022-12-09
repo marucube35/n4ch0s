@@ -36,32 +36,32 @@ int STable::Create(char *name, int init)
     int index = bm->Find();
     if (index == -1)
         return -1;
-
+    
     semTab[index] = new Sem(name, init);
-
-    return index;
+    return 0;
 }
 
 int STable::Wait(char *name)
 {
     int index = IsExist(name);
-    if (index >= 0)
+    if (index > 0)
     {
         semTab[index]->Wait();
-        return index;
+        return 0;
     }
-
-    return -1;
+    else
+        return -1;
 }
 
 int STable::Signal(char *name)
 {
     int index = IsExist(name);
-    if (index >= 0)
+
+    if (index != -1)
     {
         semTab[index]->Signal();
-        return index;
+        return 0;
     }
-
-    return -1;
+    else
+        return -1;
 }
