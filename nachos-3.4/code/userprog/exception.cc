@@ -106,70 +106,57 @@ void ExceptionHandler(ExceptionType which)
     switch (which)
     {
     case NoException:
-        printf("[Log]: Everything ok!\n");
+        printf("\n[Log]: Everything ok!\n");
         return;
     case PageFaultException:
-        printf("[Error]: No valid translation found\n");
+        printf("\n[Error]: No valid translation found\n");
         interrupt->Halt();
     case ReadOnlyException:
-        printf("[Error]: Write attempted to page marked  'read - only'\n");
+        printf("\n[Error]: Write attempted to page marked  'read - only'\n");
         interrupt->Halt();
     case BusErrorException:
-        printf("[Error]: Translation resulted in an invalid physical address\n");
+        printf("\n[Error]: Translation resulted in an invalid physical address\n");
         interrupt->Halt();
     case AddressErrorException:
-        printf("[Error]: Unaligned reference or one that was beyond the end of the address space\n");
+        printf("\n[Error]: Unaligned reference or one that was beyond the end of the address space\n");
         interrupt->Halt();
     case OverflowException:
-        printf("[Error]: Integer overflow in add or sub.\n");
+        printf("\n[Error]: Integer overflow in add or sub.\n");
         interrupt->Halt();
     case IllegalInstrException:
-        printf("[Error]: Unimplemented or reserved instr.\n");
+        printf("\n[Error]: Unimplemented or reserved instr.\n");
         interrupt->Halt();
     case NumExceptionTypes:
-        printf("[Error]: Number exception types\n");
+        printf("\n[Error]: Number exception types\n");
         interrupt->Halt();
     case SyscallException:
         switch (type)
         {
         case SC_Halt:
+        {
             DEBUG('a', "Shutdown, initiated by user program.\n");
             printf("Shutdown, initiated by user program.\n");
 
             interrupt->Halt();
             break;
+        }
         case SC_Exec:
         {
-            int virtAddr;
-            char *filename;
-
-            DEBUG('a', "SC_Exec call ...\n");
-            DEBUG('a', "Reading virtual address of file name\n");
-
-            // Lấy tham số tên chương trình từ thanh ghi r4
-            virtAddr = machine->ReadRegister(4);
-            DEBUG('a', "Reading file name.\n");
-
-            // Lấy dữ liệu từ vùng nhớ của người dùng (đối số truyền vào)
-            // thông qua địa chỉ ảo và sao chép vào vùng nhớ của hệ điều hành (filename)
             int MaxProgramLength = 32;
-            filename = UserToSystem(virtAddr, MaxProgramLength + 1);
+            int virtAddr = machine->ReadRegister(4);
+            char *filename = UserToSystem(virtAddr, MaxProgramLength + 1);
 
-            // Trường hợp không đủ vùng nhớ để lưu tên chương trình
+            //* Trường hợp không đủ vùng nhớ để lưu tên chương trình
             if (filename == NULL)
             {
-                DEBUG('a', "Not enough memory in system.\n");
-                printf("Not enough memory in system.\n");
+                printf("\n[SC_Exec]: Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
                 delete filename;
                 return;
             }
 
-            DEBUG('a', "Finish reading program name.\n");
-            printf("\nCreate file: %s\n", filename);
-
-            // Tạo tiến trình mới
+            //* Tạo tiến trình mới
             int pid = pTab->ExecUpdate(filename);
             machine->WriteRegister(2, pid); // trả về giá trị pid cho thanh ghi r2 (thành công)
 
@@ -178,18 +165,32 @@ void ExceptionHandler(ExceptionType which)
         }
         case SC_Join:
         {
+            //* Đọc id của tiến trình cần Join từ thanh ghi r4
             int pid = machine->ReadRegister(4);
+
+            //* Gọi thực hiện pTab->JoinUpdate(id)
             int exitcode = pTab->JoinUpdate(pid);
 
             machine->WriteRegister(2, exitcode);
+
             break;
         }
         case SC_Exit:
         {
-            int exitStatus = machine->ReadRegister(4);
-            int exitcode = pTab->ExitUpdate(exitStatus);
+            //* Đọc exitcode từ thanh ghi r4
+            int exitstatus = machine->ReadRegister(4);
 
-            machine->WriteRegister(2, exitcode);
+            if (exitstatus != 0)
+            {
+                AdvanceProgramCounter();
+                return;
+            }
+
+            //* Gọi thực hiện pTab->ExitUpdate(exitstatus)
+            pTab->ExitUpdate(exitstatus);
+
+            machine->WriteRegister(2, exitstatus);
+            currentThread->Finish();
             break;
         }
         case SC_Create:
@@ -197,12 +198,8 @@ void ExceptionHandler(ExceptionType which)
             int virtAddr;
             char *fileName;
 
-            DEBUG('a', "SC_Create call ...\n");
-            DEBUG('a', "Reading virtual address of filename\n");
-
             // Lấy tham số tên tập tin từ thanh ghi r4
             virtAddr = machine->ReadRegister(4);
-            DEBUG('a', "Reading filename.\n");
 
             // Lấy dữ liệu từ vùng nhớ thông qua địa chỉ ảo
             int MaxFileLength = 32;
@@ -211,21 +208,19 @@ void ExceptionHandler(ExceptionType which)
             // Trường hợp không đủ vùng nhớ để lưu tên file
             if (fileName == NULL)
             {
-                DEBUG('a', "Not enough memory in system.\n");
-                printf("Not enough memory in system.\n");
+                printf("\n[SC_Create]: Not enough memory in system.\n");
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
                 delete fileName;
                 return;
             }
 
-            DEBUG('a', "Finish reading filename.\n");
-            printf("\nCreate file: %s\n", fileName);
+            printf("\n[SC_Create]: Create file: %s\n", fileName);
 
             // Trường hợp không thể tạo file
             if (!fileSystem->Create(fileName, 0))
             {
-                printf("Error create file '%s'\n", fileName);
+                printf("\n[SC_Create]: Error create file '%s'\n", fileName);
 
                 machine->WriteRegister(2, -1); // trả về giá trị -1 cho thanh ghi r2 (lỗi)
                 delete fileName;
@@ -325,7 +320,7 @@ void ExceptionHandler(ExceptionType which)
         }
 
         default:
-            printf("\nUnexpected user mode exception (%d %d) \n", which,
+            printf("\n[Error]: Unexpected user mode exception (%d %d) \n", which,
                    type);
             interrupt->Halt();
             break;

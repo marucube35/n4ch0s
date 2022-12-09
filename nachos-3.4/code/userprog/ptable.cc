@@ -1,126 +1,146 @@
-#include "system.h"
 #include "ptable.h"
+#include "openfile.h"
+#include "system.h"
 
 PTable::PTable(int size)
 {
-    if (size < 0 || size > MAX_PROCESS)
-        return;
+    psize = size;
 
-    // Khởi tạo 'size' đối tượng pcb để lưu 'size' process.
-    this->psize = size;
-
-    // Cấp phát vùng nhớ cho bm và bmsem
-    this->bm = new BitMap(size);
-    this->bmsem = new Semaphore("bmsem", 1);
-
-    // Gán giá trị ban đầu là null.
     for (int i = 0; i < size; i++)
+    {
+        //* Khởi tạo giá trị ban đầu cho các pcb là NULL
         pcb[i] = NULL;
+    }
+
+    bm = new BitMap(size);
+    bmsem = new Semaphore("bmsem", 1);
+
+    //* Khởi tạo pcb cho tiến trình main
+    bm->Mark(0);
+    pcb[0] = new PCB(0);
+    pcb[0]->SetFileName(currentThread->getName());
 }
 
 PTable::~PTable()
 {
-    // Giải phóng vùng nhớ của bm và bmsem
-    if (bm)
-        delete bm;
-    if (bmsem)
-        delete bmsem;
-
-    // Giải phóng vùng nhớ của các pcb
-    delete[] pcb;
+    for (int i = 0; i < psize; i++)
+    {
+        if (pcb[i] != NULL)
+        {
+            delete pcb[i];
+            pcb[i] = NULL;
+        }
+    }
+    delete bm;
+    delete bmsem;
 }
 
-int PTable::ExecUpdate(char *name)
+int PTable::ExecUpdate(char *filename)
 {
+    //* Tránh tình trạng nạp 2 tiến trình cùng 1 lúc
     bmsem->P();
 
-    // Kiểm tra tính hợp lệ của tên tiến trình
-    if (!name)
-    {
-        printf("\n[PTable.Exec] Input name is empty\n");
-        bmsem->V();
-        return -1;
-    }
-
-    // Kiểm tra sự tồn tại của tiến trình
-    OpenFile *executable = fileSystem->Open(name);
+    //* Kiểm tra sự tồn tại của chương trình "name"
+    OpenFile *executable = fileSystem->Open(filename);
     if (executable == NULL)
     {
-        printf("\n[PTable.Exec] %s does not exists\n", name);
-        bmsem->V();
+        printf("\n[PTable::ExecUpdate]: Unable to open file %s\n", filename);
         return -1;
     }
 
-    // So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó
-    if (strcmp(name, currentThread->getName()) == 0)
+    //* So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó
+    if (strcmp(currentThread->getName(), filename) == 0)
     {
-        printf("\n[PTable.Exec] Can not execute itself\n");
+        printf("\n[PTable::ExecUpdate]: Unable to execute itself %s\n", filename);
         bmsem->V();
         return -1;
     }
 
-    // Tìm chỗ trống trong bảng để lưu thông tin cho tiến trình mới
-    int freeSlotIndex = this->GetFreeSlot();
-    if (freeSlotIndex < 0)
+    //* Tìm slot trống trong bảng PTable
+    int pid = GetFreeSlot();
+    if (pid < 0)
     {
-        printf("\n[PTable.Exec] There is no free slot.\n");
+        printf("\n[PTable::ExecUpdate]: No enough space for new process %s\n", filename);
         bmsem->V();
         return -1;
     }
 
-    // Khởi tạo tiến trình mới
-    pcb[freeSlotIndex] = new PCB(freeSlotIndex);
-    pcb[freeSlotIndex]->SetFileName(name);
-    pcb[freeSlotIndex]->parentID = currentThread->processID;
+    // printf("\n[PTable::ExecUpdate]: Creating process %s with processID = %d\n", filename, pid);
 
-    // Gọi thực thi phương thức Exec của lớp PCB
-    int pid = pcb[freeSlotIndex]->Exec(name, freeSlotIndex);
+    pcb[pid] = new PCB(pid);
+    pcb[pid]->SetFileName(filename);
+    pcb[pid]->parentID = currentThread->pid;
 
+    pcb[pid]->Exec(filename, pid);
+
+    //* Kết thúc critical section
     bmsem->V();
 
+    //* Trả về kết quả thực thi của PCB->Exec()
     return pid;
 }
 
 int PTable::JoinUpdate(int pid)
 {
-    // Kiểm tra tính hợp lệ của pid
-    if (!pcb[pid])
+    // printf("\n[PTable::JoinUpdate]: Process %d is being joined\n", pid);
+
+    //* Kiểm tra tính hợp lệ của processID pid
+    if (!IsExist(pid))
     {
-        printf("[PTable::JoinUpdate] Process %d does not exist\n", pid);
-        bmsem->V();
+        printf("\n[PTable::JoinUpdate]: Process %d does not exist\n", pid);
         return -1;
     }
 
-    // Kiểm tra tiến trình gọi Join có phải là cha của tiến trình có processID là pid hay không
-    if (currentThread->processID != pcb[pid]->parentID)
+    //* Kiểm tra tiến trình gọi Join có phải là cha của tiến trình có processID là id hay không
+    if (currentThread->pid != pcb[pid]->parentID)
     {
-        printf("[PTable::JoinUpdate] Process %d is not child of process %d\n", pid, currentThread->processID);
-        bmsem->V();
+        printf("\n[PTable::JoinUpdate]: Process %d is not parent of process %d\n", currentThread->pid, pid);
         return -1;
     }
 
-    pcb[pid]->IncNumWait(); // tăng numwait
-    pcb[pid]->JoinWait();   // và gọi JoinWait() để chờ tiến trình con thực hiện.
+    //* Tăng numwait
+    pcb[pcb[pid]->parentID]->IncNumWait();
+
+    //* Gọi JoinWait để chờ tiến trình con thực hiện xong
+    pcb[pid]->JoinWait();
 
     int exitcode = pcb[pid]->GetExitCode();
-    pcb[pid]->ExitRelease(); // để cho phép tiến trình con thoát
+
+    //* Cho phép tiến trình con thoát
+    pcb[pid]->ExitRelease();
 
     return exitcode;
 }
 
 int PTable::ExitUpdate(int exitcode)
 {
-    int pid = currentThread->processID;
-    if (strcmp(currentThread->getName(), "main") == 0)
+    // printf("\n[PTable::ExitUpdate]: Process %d is being exited\n", currentThread->pid);
+
+    //* Lấy processID của tiến trình hiện tại
+    int pid = currentThread->pid;
+    if (pid == 0)
     {
+        printf("\n[PTable::ExitUpdate]: Exit main process\n");
         interrupt->Halt();
+        return 0;
     }
-    else
+    if (!IsExist(pid))
     {
-        pcb[pid]->SetExitCode(exitcode); // đặt exitcode cho tiến trình gọi.
-        pcb[pid]->JoinRelease();         // giải phóng tiến trình cha đang đợi nó (nếu có).
-        pcb[pid]->ExitWait();            // xin tiến trình cha cho phép thoát.
+        printf("\n[PTable::ExitUpdate]: Process %d does not exist\n", pid);
+        return -1;
     }
+
+    //* Đặt exitcode cho tiến trình gọi.
+    pcb[pid]->SetExitCode(exitcode);
+
+    //* Giảm numwait
+    pcb[pcb[pid]->parentID]->DecNumWait();
+
+    //* Giải phóng tiến trình cha đang đợi nó (nếu có).
+    pcb[pid]->JoinRelease();
+
+    //* Xin tiến trình cha cho phép thoát.
+    pcb[pid]->ExitWait();
 
     Remove(pid);
     return exitcode;
@@ -128,20 +148,38 @@ int PTable::ExitUpdate(int exitcode)
 
 int PTable::GetFreeSlot()
 {
+    //* Tìm vị trí trống trong bitmap
     return bm->Find();
+}
+
+bool PTable::IsExist(int pid)
+{
+    //* Kiểm tra tính hợp lệ của pid
+    return bm->Test(pid);
 }
 
 void PTable::Remove(int pid)
 {
+    bmsem->P();
+    //* Xóa bit thứ i trong bitmap
     bm->Clear(pid);
-    if (pcb[pid] != 0)
+
+    //* Xóa tiến trình pid ra khỏi mảng pcb
+    if (pcb[pid])
+    {
         delete pcb[pid];
+        pcb[pid] = NULL;
+    }
+    bmsem->V();
 }
 
 char *PTable::GetFileName(int id)
 {
-    if (id < 0 || id >= psize)
-        return NULL;
-
+    //* Tìm kiếm pid trong mảng pcb và trả về tên nếu tìm thấy
     return pcb[id]->GetFileName();
+}
+
+void PTable::Print()
+{
+    bm->Print();
 }

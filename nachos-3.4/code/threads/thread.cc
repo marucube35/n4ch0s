@@ -38,9 +38,6 @@ Thread::Thread(char *threadName)
     stackTop = NULL;
     stack = NULL;
     status = JUST_CREATED;
-
-    processID = 0;
-    exitStatus = 0;
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
@@ -60,6 +57,9 @@ Thread::Thread(char *threadName)
 
 Thread::~Thread()
 {
+    if (space)
+        delete space;
+
     DEBUG('t', "Deleting thread \"%s\"\n", name);
 
     ASSERT(this != currentThread);

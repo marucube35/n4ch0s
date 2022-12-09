@@ -1,33 +1,33 @@
 #ifndef PTABLE_H
 #define PTABLE_H
-#define MAX_PROCESS 10
 #include "bitmap.h"
 #include "pcb.h"
 #include "synch.h"
+#define MAX_PROCESS 10
 
-// Lớp quản lý các tiến trình đang chạy,
-// bản chất là một bảng (mảng) các tiến trình.
 class PTable
 {
 private:
-    int psize;             // kích thước của bảng các tiến trình
-    PCB *pcb[MAX_PROCESS]; // lưu các pcb của các tiến trình
-    BitMap *bm;            // lưu trạng thái của các tiến trình trong bảng các tiến trình (trống hoặc không trống)
-    Semaphore *bmsem;      // dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng lúc
+    int psize;
+    PCB *pcb[MAX_PROCESS];
+    BitMap *bm;       //? Đánh dấu các vị trí đã được sử dụng trong pcb
+    Semaphore *bmsem; // Dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng lúc
+                      // Nhớ khởi tạo bm và bmsem để sử dụng
 
 public:
-    // Khởi tạo 'size' đối tượng pcb để lưu 'size' process.
-    PTable(int size);
-    ~PTable();
+    PTable(int size); // Khởi tạo size đối tượng PCB để lưu size process.
+                      // Gán giá trị ban đầu là của mỗi phần tử là null
+    ~PTable();        // Giải phóng bộ nhớ
 
-    int ExecUpdate(char *name); // Xử lý cho system call SC_Exec
-    int JoinUpdate(int pid);     // Xử lý cho system call SC_Join
-    int ExitUpdate(int exitcode);     // Xử lý cho system call SC_Exit
+    int ExecUpdate(char *filename); // Xử lý cho system call SC_Exit
+    int ExitUpdate(int exitcode);   // Xử lý cho system call SC_Exit
+    int JoinUpdate(int pid);        // Xử lý cho system call SC_Join
 
-    int GetFreeSlot();         // Tìm chỗ trống trong bảng để lưu thông tin cho tiến trình mới
-    bool IsExist(int pid);     // Kiểm tra có tồn tại processID này không?
-    void Remove(int pid);      // Khi tiến trình kết thúc, delete processID ra khỏi mảng quản lý nó
-    char *GetFileName(int id); // Trả về tên của tiến trình
+    int GetFreeSlot();          // Tìm free slot để lưu thông tin cho tiến trình mới
+    bool IsExist(int pid);      // Kiểm tra xem có tồn tại processID này không
+    void Remove(int pid);       // Khi tiến trình kết thúc, delete processID ra khỏi mảng quản lý nó
+    char *GetFileName(int pid); // Trả về tên của tiến trình
+    void Print();               // In ra danh sách các tiến trình đang chạy
 };
 
 #endif

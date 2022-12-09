@@ -59,53 +59,58 @@ SwapHeader(NoffHeader *noffH)
 //
 //	"executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
-AddrSpace::AddrSpace(char *filename)
+
+AddrSpace::AddrSpace(char* filename)
 {
     NoffHeader noffH;
     unsigned int i, size, j;
-    unsigned int numCodePage, numDataPage;                                   // số trang cho phần code và phần initData
-    int lastCodePageSize, lastDataPageSize, firstDataPageSize, tempDataSize; // kích thước ghi vào trang cuối Code, initData
-                                                                             // và trang đầu của initData
+    unsigned int numCodePage, numDataPage;  //* Số trang cho phần code và phần initData
+    int lastCodePageSize, lastDataPageSize; //* Kích thước trang cuối của phần code và phần data
+    int firstDataPageSize, tempDataSize;    //* Kích thước trang đầu phần initData và kích thước data tạm
+
+    //* Kiểm tra sự tồn tại của file chương trình
     OpenFile *executable = fileSystem->Open(filename);
     if (executable == NULL)
     {
-        printf("\nAddrspace::Error opening file: %s", filename);
-        DEBUG('a', "\n Error opening file.");
+        printf("\n[AddrSpace::AddrSpace]: Unable to open file %s\n", filename);
         return;
     }
 
-    // Read file's header
+    //* Đọc header của file chương trình cần chạy
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) &&
         (WordToHost(noffH.noffMagic) == NOFFMAGIC))
         SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
 
+    //* Bắt đầu khóa critical section để tránh trường hợp 2 tiến trình cùng chạy vào đây
     addrLock->P();
 
-    // How big is address space?
+    //* How big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize; // we need to increase the size
-
-    // To leave room for the stack
+                                                                                          // to leave room for the stack
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
-    // Check the available memory enough to load new process debug
-    if (numPages > gPhysPageBitMap->CountEmptyPages())
+    //* Kiểm tra xem có đủ số trang bộ nhớ để nạp chương trình hay không
+    if (numPages > gPhysPageBitMap->NumClear())
     {
-        printf("\nAddrSpace:Load: not enough memory for new process..!");
+        printf("\n[AddrSpace::AddrSpace]: not enough memory for new process\n");
+
         numPages = 0;
         delete executable;
+
+        //* Thoát khỏi critical section
         addrLock->V();
         return;
     }
 
-    // First, set up the translation
+    //* Thiết lập mảng ánh xạ từ trang ảo sang trang vật lý
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++)
     {
-        pageTable[i].virtualPage = i; // for now, virtual page # = phys page #
-        pageTable[i].physicalPage = gPhysPageBitMap->Find();
+        pageTable[i].virtualPage = i;                        // for now, virtual page # = phys page #
+        pageTable[i].physicalPage = gPhysPageBitMap->Find(); // * Tìm trang trống và sử dụng
         pageTable[i].valid = TRUE;
         pageTable[i].use = FALSE;
         pageTable[i].dirty = FALSE;
@@ -113,20 +118,21 @@ AddrSpace::AddrSpace(char *filename)
                                        // a separate page, we could set its
                                        // pages to be read-only
 
-        // Delete on memory
+        //* Set giá trị 0 cho các trang này
         bzero(&(machine->mainMemory[pageTable[i].physicalPage * PageSize]), PageSize);
-        printf("phyPage %d \n", pageTable[i].physicalPage);
     }
 
+    //* Thoát khỏi critical section
     addrLock->V();
 
-    // Calculate numCodePage and numDataPage
+    //* Tính numCodePage
     numCodePage = divRoundUp(noffH.code.size, PageSize);
 
-    // Calculate lastCodePageSize
+    //* Tính lastCodePageSize và tempDataSize
     lastCodePageSize = noffH.code.size - (numCodePage - 1) * PageSize;
     tempDataSize = noffH.initData.size - (PageSize - lastCodePageSize);
 
+    //* Tính numDataPage, lastDataPageSize và firstDataPageSize
     if (tempDataSize < 0)
     {
         numDataPage = 0;
@@ -139,21 +145,20 @@ AddrSpace::AddrSpace(char *filename)
         firstDataPageSize = PageSize - lastCodePageSize;
     }
 
-    // Copy the Code segment into memory
+    // * Nạp chương trình lên bộ nhớ chính
     for (i = 0; i < numCodePage; i++)
     {
-        // if(noffH.code.size > 0)
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) +
-                               pageTable[i].physicalPage * PageSize,
-                           i < (numCodePage - 1) ? PageSize : lastCodePageSize,
-                           noffH.code.inFileAddr + i * PageSize);
+        if (noffH.code.size > 0)
+            executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) +
+                                   pageTable[i].physicalPage * PageSize,
+                               i < (numCodePage - 1) ? PageSize : lastCodePageSize,
+                               noffH.code.inFileAddr + i * PageSize);
     }
 
-    // Check whether last page of code segment is full and copy the first part of
-    // initData segment into this page
+    //* Kiểm tra xem lastCodePage có đầy hay không, nếu không thì copy phần đầu của initData vào trang này
     if (lastCodePageSize < PageSize)
     {
-        // Copy initData into the remain part of lastCodePage
+        //* Sao chép initData vào phần còn lại của lastCodePage
         if (firstDataPageSize > 0)
             executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) +
                                    (pageTable[i - 1].physicalPage * PageSize +
@@ -161,18 +166,16 @@ AddrSpace::AddrSpace(char *filename)
                                firstDataPageSize, noffH.initData.inFileAddr);
     }
 
-    // Copy the remain of initData segment into memory
+    //* Sao chép phần còn lại của initData vào bộ nhớ
     for (j = 0; j < numDataPage; j++)
     {
-        // if(noffH.initData.size > 0)
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) +
-                               pageTable[i].physicalPage * PageSize,
-                           j < (numDataPage - 1) ? PageSize : lastDataPageSize,
-                           noffH.initData.inFileAddr + j * PageSize + firstDataPageSize);
+        if (noffH.initData.size > 0)
+            executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]) +
+                                   pageTable[i].physicalPage * PageSize,
+                               j < (numDataPage - 1) ? PageSize : lastDataPageSize,
+                               noffH.initData.inFileAddr + j * PageSize + firstDataPageSize);
         i++;
     }
-    delete executable;
-    return;
 }
 
 //----------------------------------------------------------------------

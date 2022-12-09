@@ -86,9 +86,8 @@ private:
 	int machineState[MachineStateSize]; // all registers except for stackTop
 
 public:
-	int processID;
-	int exitStatus;
-
+	int pid;
+	int parentID;
 	Thread(char *debugName); // initialize a Thread
 	~Thread();				 // deallocate a Thread
 							 // NOTE -- thread being deleted

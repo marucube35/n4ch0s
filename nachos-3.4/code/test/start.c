@@ -184,4 +184,3 @@ PrintString:
 __main:
         j       $31
         .end    __main
-
