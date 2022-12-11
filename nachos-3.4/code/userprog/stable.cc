@@ -47,7 +47,7 @@ int STable::Wait(char *name)
     if (index != -1)
     {
         semTab[index]->Wait();
-        return index;
+        return 0;
     }
     else
         return -1;
@@ -60,7 +60,7 @@ int STable::Signal(char *name)
     if (index != -1)
     {
         semTab[index]->Signal();
-        return index;
+        return 0;
     }
     else
         return -1;
