@@ -39,6 +39,7 @@ int PCB::Exec(char *name, int pid)
         printf("\n[PCB::Exec]: Not enough memory for creating thread %s\n", name);
         //* Kết thúc critical section
         multex->V();
+        return -1;
     }
 
     //* Đặt processID của tiến trình mới tạo là pid

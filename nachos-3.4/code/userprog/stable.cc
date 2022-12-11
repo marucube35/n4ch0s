@@ -38,16 +38,16 @@ int STable::Create(char *name, int init)
         return -1;
     
     semTab[index] = new Sem(name, init);
-    return 0;
+    return index;
 }
 
 int STable::Wait(char *name)
 {
     int index = IsExist(name);
-    if (index > 0)
+    if (index != -1)
     {
         semTab[index]->Wait();
-        return 0;
+        return index;
     }
     else
         return -1;
@@ -60,7 +60,7 @@ int STable::Signal(char *name)
     if (index != -1)
     {
         semTab[index]->Signal();
-        return 0;
+        return index;
     }
     else
         return -1;

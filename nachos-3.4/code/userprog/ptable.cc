@@ -40,11 +40,12 @@ int PTable::ExecUpdate(char *filename)
     //* Tránh tình trạng nạp 2 tiến trình cùng 1 lúc
     bmsem->P();
 
-    //* Kiểm tra sự tồn tại của chương trình "name"
+    //* Kiểm tra sự tồn tại của chương trình "filename"
     OpenFile *executable = fileSystem->Open(filename);
     if (executable == NULL)
     {
         printf("\n[PTable::ExecUpdate]: Unable to open file %s\n", filename);
+        bmsem->V();
         return -1;
     }
 

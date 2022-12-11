@@ -9,10 +9,10 @@ private:
     char name[50];
     Semaphore *sem; // Tạo Semaphore để quản lý
 public:
-    Sem(char *na, int i)
+    Sem(char *semName, int initVal)
     {
-        strcpy(this->name, na);
-        sem = new Semaphore(name, i);
+        strcpy(this->name, semName);
+        sem = new Semaphore(name, initVal);
     }
     ~Sem() { delete sem; }
 
