@@ -206,7 +206,7 @@ void ExceptionHandler(ExceptionType which)
             machine->WriteRegister(2, index);
             break;
         }
-        case SC_Up:
+        case SC_Signal:
         {
             int virtAddr, MaxLength = 32;
             char *name;
@@ -216,7 +216,7 @@ void ExceptionHandler(ExceptionType which)
 
             if (!semTab->IsExist(name))
             {
-                printf("\n[SC_Up]: Semaphore is not exist.\n");
+                printf("\n[SC_Signal]: Semaphore is not exist.\n");
                 machine->WriteRegister(2, -1);
                 break;
             }
@@ -225,7 +225,7 @@ void ExceptionHandler(ExceptionType which)
             machine->WriteRegister(2, result);
             break;
         }
-        case SC_Down:
+        case SC_Wait:
         {
             int virtAddr, MaxLength = 32;
             char *name;
@@ -235,7 +235,7 @@ void ExceptionHandler(ExceptionType which)
 
             if (!semTab->IsExist(name))
             {
-                printf("\n[SC_Down]: Semaphore is not exist.\n");
+                printf("\n[SC_Wait]: Semaphore is not exist.\n");
                 machine->WriteRegister(2, -1);
                 break;
             }
