@@ -195,13 +195,9 @@ void ExceptionHandler(ExceptionType which)
         }
         case SC_CreateSemaphore:
         {
-            int virtAddr, initVal;
-            char *name;
-
-            virtAddr = machine->ReadRegister(4);
-            initVal = machine->ReadRegister(5);
-
-            name = UserToSystem(virtAddr, MaxNameLength + 1);
+            int virtAddr = machine->ReadRegister(4);
+            int initVal = machine->ReadRegister(5);
+            char* name = UserToSystem(virtAddr, MaxNameLength + 1);
 
             int index = semTab->Create(name, initVal);
             printf("\n[SC_CreateSemaphore]: Semaphore created at index: %d\n", index);
