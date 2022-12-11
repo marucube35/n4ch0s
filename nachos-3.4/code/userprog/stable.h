@@ -2,8 +2,8 @@
 #ifndef STABLE_H
 #define STABLE_H
 #include "bitmap.h"
-#include "synch.h"
 #include "sem.h"
+#include "synch.h"
 #define MAX_SEMAPHORE 10
 
 class STable
@@ -20,5 +20,6 @@ public:
     int Create(char *name, int init); // Kiểm tra Semaphore “name” chưa tồn tại thì tạo
     int Wait(char *name);             // Nếu tồn tại Semaphore “name” thì gọi this->P() để thực thi.
     int Signal(char *name);           // Nếu tồn tại Semaphore “name” thì gọi this->V() để thực thi.
+    int GetValue(char *name);         // Lấy ra giá trị của Semaphore
 };
 #endif

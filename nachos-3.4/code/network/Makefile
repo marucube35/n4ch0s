@@ -46,7 +46,7 @@ main.o: ../threads/main.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -85,7 +85,7 @@ scheduler.o: ../threads/scheduler.cc /usr/include/stdc-predef.h \
  ../machine/interrupt.h ../threads/list.h ../machine/stats.h \
  ../machine/timer.h ../threads/synchcons.h ../machine/console.h \
  ../userprog/bitmap.h ../threads/synch.h ../userprog/stable.h \
- ../userprog/bitmap.h ../threads/synch.h ../userprog/sem.h \
+ ../userprog/bitmap.h ../userprog/sem.h ../threads/synch.h \
  ../userprog/ptable.h ../userprog/pcb.h ../threads/thread.h \
  ../filesys/filesys.h ../filesys/openfile.h ../filesys/synchdisk.h \
  ../machine/disk.h ../network/post.h ../machine/network.h \
@@ -110,7 +110,7 @@ synch.o: ../threads/synch.cc /usr/include/stdc-predef.h \
  ../machine/interrupt.h ../threads/list.h ../threads/scheduler.h \
  ../machine/stats.h ../machine/timer.h ../threads/synchcons.h \
  ../machine/console.h ../userprog/bitmap.h ../userprog/stable.h \
- ../userprog/bitmap.h ../threads/synch.h ../userprog/sem.h \
+ ../userprog/bitmap.h ../userprog/sem.h ../threads/synch.h \
  ../userprog/ptable.h ../userprog/pcb.h ../threads/thread.h \
  ../filesys/filesys.h ../filesys/openfile.h ../filesys/synchdisk.h \
  ../machine/disk.h ../network/post.h ../machine/network.h \
@@ -152,7 +152,7 @@ system.o: ../threads/system.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -177,7 +177,7 @@ thread.o: ../threads/thread.cc /usr/include/stdc-predef.h \
  ../threads/list.h ../threads/scheduler.h ../machine/stats.h \
  ../machine/timer.h ../threads/synchcons.h ../machine/console.h \
  ../userprog/bitmap.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -215,7 +215,7 @@ threadtest.o: ../threads/threadtest.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -239,8 +239,8 @@ interrupt.o: ../machine/interrupt.cc /usr/include/stdc-predef.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/openfile.h \
  ../machine/stats.h ../machine/timer.h ../threads/synchcons.h \
  ../machine/console.h ../userprog/bitmap.h ../threads/synch.h \
- ../userprog/stable.h ../userprog/bitmap.h ../threads/synch.h \
- ../userprog/sem.h ../userprog/ptable.h ../userprog/pcb.h \
+ ../userprog/stable.h ../userprog/bitmap.h ../userprog/sem.h \
+ ../threads/synch.h ../userprog/ptable.h ../userprog/pcb.h \
  ../threads/thread.h ../filesys/filesys.h ../filesys/openfile.h \
  ../filesys/synchdisk.h ../machine/disk.h ../network/post.h \
  ../machine/network.h ../threads/synchlist.h
@@ -307,7 +307,7 @@ sysdep.o: ../machine/sysdep.cc /usr/include/stdc-predef.h \
  ../userprog/addrspace.h ../filesys/openfile.h ../machine/stats.h \
  ../machine/timer.h ../threads/synchcons.h ../machine/console.h \
  ../userprog/bitmap.h ../threads/synch.h ../userprog/stable.h \
- ../userprog/bitmap.h ../threads/synch.h ../userprog/sem.h \
+ ../userprog/bitmap.h ../userprog/sem.h ../threads/synch.h \
  ../userprog/ptable.h ../userprog/pcb.h ../threads/thread.h \
  ../filesys/filesys.h ../filesys/openfile.h ../filesys/synchdisk.h \
  ../machine/disk.h ../network/post.h ../machine/network.h \
@@ -347,7 +347,7 @@ timer.o: ../machine/timer.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -371,7 +371,7 @@ addrspace.o: ../userprog/addrspace.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h \
@@ -455,10 +455,10 @@ stable.o: ../userprog/stable.cc /usr/include/stdc-predef.h \
  /usr/include/_G_config.h /usr/include/wchar.h ../threads/stdarg.h \
  /usr/include/i386-linux-gnu/bits/stdio_lim.h \
  /usr/include/i386-linux-gnu/bits/sys_errlist.h /usr/include/string.h \
- /usr/include/xlocale.h ../filesys/openfile.h ../threads/synch.h \
- ../threads/thread.h ../threads/utility.h ../machine/machine.h \
- ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
- ../threads/list.h ../userprog/sem.h
+ /usr/include/xlocale.h ../filesys/openfile.h ../userprog/sem.h \
+ ../threads/synch.h ../threads/thread.h ../threads/utility.h \
+ ../machine/machine.h ../machine/translate.h ../machine/disk.h \
+ ../userprog/addrspace.h ../threads/list.h
 exception.o: ../userprog/exception.cc /usr/include/stdc-predef.h \
  ../threads/copyright.h ../userprog/syscall.h ../threads/system.h \
  ../threads/copyright.h ../machine/interrupt.h ../threads/list.h \
@@ -480,7 +480,7 @@ exception.o: ../userprog/exception.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -504,7 +504,7 @@ progtest.o: ../userprog/progtest.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h \
@@ -530,7 +530,7 @@ console.o: ../machine/console.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -555,7 +555,7 @@ machine.o: ../machine/machine.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -580,7 +580,7 @@ mipssim.o: ../machine/mipssim.cc /usr/include/stdc-predef.h \
  ../userprog/addrspace.h ../filesys/openfile.h ../machine/stats.h \
  ../machine/timer.h ../threads/synchcons.h ../machine/console.h \
  ../userprog/bitmap.h ../threads/synch.h ../userprog/stable.h \
- ../userprog/bitmap.h ../threads/synch.h ../userprog/sem.h \
+ ../userprog/bitmap.h ../userprog/sem.h ../threads/synch.h \
  ../userprog/ptable.h ../userprog/pcb.h ../threads/thread.h \
  ../filesys/filesys.h ../filesys/openfile.h ../filesys/synchdisk.h \
  ../machine/disk.h ../network/post.h ../machine/network.h \
@@ -606,7 +606,7 @@ translate.o: ../machine/translate.cc /usr/include/stdc-predef.h \
  ../machine/machine.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h
@@ -664,7 +664,7 @@ filehdr.o: ../filesys/filehdr.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h \
@@ -706,8 +706,8 @@ fstest.o: ../filesys/fstest.cc /usr/include/stdc-predef.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/openfile.h \
  ../machine/stats.h ../machine/timer.h ../threads/synchcons.h \
  ../machine/console.h ../userprog/bitmap.h ../threads/synch.h \
- ../userprog/stable.h ../userprog/bitmap.h ../threads/synch.h \
- ../userprog/sem.h ../userprog/ptable.h ../userprog/pcb.h \
+ ../userprog/stable.h ../userprog/bitmap.h ../userprog/sem.h \
+ ../threads/synch.h ../userprog/ptable.h ../userprog/pcb.h \
  ../threads/thread.h ../filesys/filesys.h ../filesys/synchdisk.h \
  ../machine/disk.h ../network/post.h ../machine/network.h \
  ../threads/synchlist.h
@@ -732,7 +732,7 @@ openfile.o: ../filesys/openfile.cc /usr/include/stdc-predef.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
  ../machine/stats.h ../machine/timer.h ../threads/synchcons.h \
  ../machine/console.h ../threads/synch.h ../userprog/stable.h \
- ../userprog/bitmap.h ../threads/synch.h ../userprog/sem.h \
+ ../userprog/bitmap.h ../userprog/sem.h ../threads/synch.h \
  ../userprog/ptable.h ../userprog/pcb.h ../threads/thread.h \
  ../filesys/filesys.h ../filesys/synchdisk.h ../network/post.h \
  ../machine/network.h ../threads/synchlist.h
@@ -774,8 +774,8 @@ disk.o: ../machine/disk.cc /usr/include/stdc-predef.h \
  ../machine/translate.h ../userprog/addrspace.h ../filesys/openfile.h \
  ../machine/stats.h ../machine/timer.h ../threads/synchcons.h \
  ../machine/console.h ../userprog/bitmap.h ../threads/synch.h \
- ../userprog/stable.h ../userprog/bitmap.h ../threads/synch.h \
- ../userprog/sem.h ../userprog/ptable.h ../userprog/pcb.h \
+ ../userprog/stable.h ../userprog/bitmap.h ../userprog/sem.h \
+ ../threads/synch.h ../userprog/ptable.h ../userprog/pcb.h \
  ../threads/thread.h ../filesys/filesys.h ../filesys/openfile.h \
  ../filesys/synchdisk.h ../machine/disk.h ../network/post.h \
  ../machine/network.h ../threads/synchlist.h
@@ -799,7 +799,7 @@ nettest.o: ../network/nettest.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h \
@@ -842,7 +842,7 @@ network.o: ../machine/network.cc /usr/include/stdc-predef.h \
  ../filesys/openfile.h ../machine/stats.h ../machine/timer.h \
  ../threads/synchcons.h ../machine/console.h ../userprog/bitmap.h \
  ../threads/synch.h ../userprog/stable.h ../userprog/bitmap.h \
- ../threads/synch.h ../userprog/sem.h ../userprog/ptable.h \
+ ../userprog/sem.h ../threads/synch.h ../userprog/ptable.h \
  ../userprog/pcb.h ../threads/thread.h ../filesys/filesys.h \
  ../filesys/openfile.h ../filesys/synchdisk.h ../machine/disk.h \
  ../network/post.h ../machine/network.h ../threads/synchlist.h

@@ -145,8 +145,8 @@ void PrintString(char *buffer);
     Semaphore syscalls
 */
 int CreateSemaphore(char *name, int semval);
-int Wait(char* name);
 int Signal(char* name);
+int Wait(char* name);
 
 #endif /* IN_ASM */
 

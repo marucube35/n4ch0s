@@ -48,6 +48,8 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
+int MaxNameLength = 32;
+
 void AdvanceProgramCounter()
 {
     // Advance program counters.
@@ -193,55 +195,57 @@ void ExceptionHandler(ExceptionType which)
         }
         case SC_CreateSemaphore:
         {
-            int virtAddr, initVal, MaxLength = 32;
+            int virtAddr, initVal;
             char *name;
 
             virtAddr = machine->ReadRegister(4);
             initVal = machine->ReadRegister(5);
 
-            name = UserToSystem(virtAddr, MaxLength + 1);
+            name = UserToSystem(virtAddr, MaxNameLength + 1);
 
             int index = semTab->Create(name, initVal);
+            printf("\n[SC_CreateSemaphore]: Semaphore created at index: %d\n", index);
 
             machine->WriteRegister(2, index);
+            AdvanceProgramCounter();
             break;
         }
         case SC_Signal:
         {
-            int virtAddr, MaxLength = 32;
-            char *name;
-
-            virtAddr = machine->ReadRegister(4);
-            name = UserToSystem(virtAddr, MaxLength + 1);
+            int virtAddr = machine->ReadRegister(4);
+            char *name = UserToSystem(virtAddr, MaxNameLength + 1);
+            printf("\n[SC_Signal]: Semaphore name: %s, current value: %d\n", name, semTab->GetValue(name));
 
             if (!semTab->IsExist(name))
             {
                 printf("\n[SC_Signal]: Semaphore is not exist.\n");
                 machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
                 break;
             }
 
             int result = semTab->Signal(name);
             machine->WriteRegister(2, result);
+            AdvanceProgramCounter();
             break;
         }
         case SC_Wait:
         {
-            int virtAddr, MaxLength = 32;
-            char *name;
-
-            virtAddr = machine->ReadRegister(4);
-            name = UserToSystem(virtAddr, MaxLength + 1);
+            int virtAddr = machine->ReadRegister(4);
+            char *name = UserToSystem(virtAddr, MaxNameLength + 1);
+            printf("\n[SC_Wait]: Semaphore name: %s, current value: %d\n", name, semTab->GetValue(name));
 
             if (!semTab->IsExist(name))
             {
                 printf("\n[SC_Wait]: Semaphore is not exist.\n");
                 machine->WriteRegister(2, -1);
+                AdvanceProgramCounter();
                 break;
             }
 
             int result = semTab->Wait(name);
             machine->WriteRegister(2, result);
+            AdvanceProgramCounter();
             break;
         }
         case SC_Create:
@@ -253,8 +257,7 @@ void ExceptionHandler(ExceptionType which)
             virtAddr = machine->ReadRegister(4);
 
             // Lấy dữ liệu từ vùng nhớ thông qua địa chỉ ảo
-            int MaxFileLength = 32;
-            fileName = UserToSystem(virtAddr, MaxFileLength + 1);
+            fileName = UserToSystem(virtAddr, MaxNameLength + 1);
 
             // Trường hợp không đủ vùng nhớ để lưu tên file
             if (fileName == NULL)
@@ -287,8 +290,7 @@ void ExceptionHandler(ExceptionType which)
         {
             int virtAddr = machine->ReadRegister(4);
             int type = machine->ReadRegister(5);
-            int MaxFileLength = 32;
-            char *filename = UserToSystem(virtAddr, MaxFileLength);
+            char *filename = UserToSystem(virtAddr, MaxNameLength);
 
             int freeSlot = fileSystem->FindFreeSlot();
             if (freeSlot != -1)

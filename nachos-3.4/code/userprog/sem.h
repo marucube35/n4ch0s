@@ -19,6 +19,7 @@ public:
     void Wait() { sem->P(); }        // Thực hiện thao tác chờ
     void Signal() { sem->V(); }      // Thực hiện thao tác giải phóng Semaphore
     char *GetName() { return name; } // Trả về tên của Semaphore
+    int GetValue() { return sem->getValue(); }
 };
 
 #endif

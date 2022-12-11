@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort in_out createfile readprintfile ping pong pingpong
+all: halt shell matmult sort in_out createfile readprintfile ping pong pingpong semaphore
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -101,4 +101,10 @@ pingpong.o: pingpong
 pingpong: pingpong.o start.o
 	$(LD) $(LDFLAGS) start.o pingpong.o -o pingpong.coff
 	../bin/coff2noff pingpong.coff pingpong
+
+semaphore.o: semaphore
+	$(CC) $(CFLAGS) -c semaphore.c
+semaphore: semaphore.o start.o
+	$(LD) $(LDFLAGS) start.o semaphore.o -o semaphore.coff
+	../bin/coff2noff semaphore.coff semaphore
 
